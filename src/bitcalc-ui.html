@@ -1,0 +1,456 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title data-i18n="title">BitCalc Bitcoin Address Calculator</title>
+	<style type="text/css">
+//main.css
+	</style>
+</head>
+<body onclick="if(typeof SecureRandom!=='undefined')SecureRandom.seedTime();"
+	onmousemove="seedRandom(event);">
+<div class="loading-overlay" id="loading-overlay">
+	<div class="loading-spinner"></div>
+	<div class="loading-text" data-i18n="loading">计算中...</div>
+</div>
+
+<div class="header">
+	<h1><span>Bit</span>Calc <span data-i18n="title" style="font-weight:300;font-size:14px;color:#888;margin-left:8px;">Bitcoin Address Calculator</span></h1>
+	<div class="lang-switch">
+		<button class="lang-btn active" data-lang="zh" data-i18n="langZh" onclick="setLang('zh')">中文</button>
+		<button class="lang-btn" data-lang="en" data-i18n="langEn" onclick="setLang('en')">English</button>
+	</div>
+</div>
+
+<div class="tabs">
+	<div class="tab active" id="tab-brain" onclick="showTab('brain')" data-i18n="tabBrain">脑钱包</div>
+	<div class="tab" id="tab-random" onclick="showTab('random')" data-i18n="tabRandom">随机钱包</div>
+	<div class="tab" id="tab-mnemonic" onclick="showTab('mnemonic')" data-i18n="tabMnemonic">助记词</div>
+	<div class="tab" id="tab-verify" onclick="showTab('verify')" data-i18n="tabVerify">验证</div>
+	<div class="tab" id="tab-test" onclick="showTab('test')" data-i18n="tabTest">自检</div>
+</div>
+
+<div id="content-brain" class="tab-content active">
+	<div class="section">
+		<h2 data-i18n="brainTitle">脑钱包 - 从密码生成地址</h2>
+
+		<div class="form-row">
+			<label data-i18n="enterPassword">输入密码</label>
+			<input type="password" id="brain-pw" data-i18n-placeholder="pwPlaceholder" onkeypress="if(event.keyCode==13)generateBrainWallet()">
+		</div>
+		<div class="form-row" id="brain-confirm-label">
+			<label data-i18n="confirmPassword">确认密码</label>
+			<input type="password" id="brain-confirm" data-i18n-placeholder="confirmHint" onkeypress="if(event.keyCode==13)generateBrainWallet()">
+		</div>
+		<div class="form-row">
+			<label></label>
+			<span class="check-row">
+				<label><input type="checkbox" id="brain-show" onchange="toggleBrainShow(this)"> <span data-i18n="showPw">显示?</span></label>
+			</span>
+		</div>
+
+		<div style="margin-top:12px;border-top:1px solid #eee;padding-top:12px;">
+			<div class="adv-toggle" onclick="toggleAdv(this)">
+				<span data-i18n="advOptions">高级选项</span>
+				<span class="adv-arrow">&#9654;</span>
+			</div>
+			<div class="adv-content" style="display:none;margin-top:10px;">
+				<div class="form-row">
+					<label data-i18n="iterations">迭代次数</label>
+					<input type="number" id="brain-iters" value="1" min="1" max="1000000" disabled>
+					<label class="danger-cb"><input type="checkbox" onchange="toggleDanger(this,'brain-iters')"> <span data-i18n="dangerCb">危险（我确信我知道我在干什么）</span></label>
+				</div>
+				<div class="form-row">
+					<span style="font-size:11px;color:#888;" data-i18n="iterDesc">迭代次数=1时使用SHA256(密码); >1时使用迭代SHA256</span>
+				</div>
+				<div class="form-row">
+					<label data-i18n="wordCount">单词数</label>
+					<div class="select-group">
+						<select id="brain-words"><option value="12">12</option><option value="24" selected>24</option></select>
+					</div>
+				</div>
+				<div class="form-row">
+					<label data-i18n="mnemonicPassphrase">助记词口令</label>
+					<input type="text" id="brain-passphrase" data-i18n-placeholder="passphrasePlaceholder" disabled>
+					<label class="danger-cb"><input type="checkbox" onchange="toggleDanger(this,'brain-passphrase')"> <span data-i18n="dangerCb">危险（我确信我知道我在干什么）</span></label>
+				</div>
+			</div>
+		</div>
+		<div class="form-row" style="margin-top:12px;">
+			<label></label>
+			<button class="btn" onclick="generateBrainWallet()" data-i18n="generate">生成</button>
+		</div>
+	</div>
+
+	<div class="output-area" id="brain-output">
+		<div class="section">
+			<h2 data-i18n="mnemonicOutput">助记词路径</h2>
+			<div class="output-row" data-field="mnemonic">
+				<div class="output-label" data-i18n="mnemonicLabel">助记词</div>
+				<div class="output-value mnemonic-words"></div>
+			</div>
+			<div class="qr-row">
+				<div class="qr-item"><div id="brain-qr-segwit"></div><div class="qr-label" data-i18n="derivedSegwit">HD SegWit</div></div>
+			</div>
+			<div class="output-row" data-field="bip84">
+				<div class="output-label" data-i18n="derivedSegwit">派生 SegWit 地址 #0 (m/84'/0'/0'/0/0)</div>
+				<div class="output-value"></div>
+			</div>
+		</div>
+
+		<div class="section">
+			<h2 data-i18n="legacyTitle">Legacy 路径</h2>
+			<div style="margin:12px 0;padding:12px;background:#f8f9fa;border-radius:6px;">
+				<div class="qr-row">
+					<div class="qr-item"><div id="brain-qr-p2wpkh"></div><div class="qr-label" data-i18n="p2wpkhLabel">SegWit</div></div>
+					<div class="qr-item"><div id="brain-qr-wif-comp"></div><div class="qr-label" data-i18n="wifCompShort">WIF (压缩)</div></div>
+				</div>
+				<div class="output-row" data-field="p2wpkh">
+					<div class="output-label" data-i18n="p2wpkhLabel">原生 SegWit 地址 (压缩公钥)</div>
+					<div class="output-value"></div>
+				</div>
+				<div class="output-row" data-field="wifComp">
+					<div class="output-label" data-i18n="wifComp">私钥 WIF (压缩, K/L...)</div>
+					<div class="output-value"></div>
+				</div>
+			</div>
+
+			<div style="margin:12px 0;padding:12px;background:#f8f9fa;border-radius:6px;">
+				<div class="qr-row">
+					<div class="qr-item"><div id="brain-qr-p2pkh"></div><div class="qr-label" data-i18n="p2pkhLabel">P2PKH</div></div>
+					<div class="qr-item"><div id="brain-qr-wif"></div><div class="qr-label" data-i18n="wifUncompShort">WIF (非压缩)</div></div>
+				</div>
+				<div class="output-row" data-field="p2pkh">
+					<div class="output-label" data-i18n="p2pkhLabel">P2PKH 地址 (非压缩公钥)</div>
+					<div class="output-value"></div>
+				</div>
+				<div class="output-row" data-field="wifUncomp">
+					<div class="output-label" data-i18n="wifUncomp">私钥 WIF (非压缩, 5...)</div>
+					<div class="output-value"></div>
+				</div>
+			</div>
+		</div>
+
+		<div class="section" style="padding:8px 16px;">
+			<div class="adv-toggle" onclick="toggleAdv(this)" style="font-size:12px;color:#999;">
+				<span class="adv-arrow">&#9654;</span>
+				<span data-i18n="techDetails">技术详情 (Hex)</span>
+			</div>
+			<div class="adv-content" style="display:none;margin-top:6px;">
+				<div class="output-row" data-field="entropyHex" style="margin-bottom:6px;">
+					<div class="output-label" data-i18n="entropyLabel">熵 (Hex)</div>
+					<div class="output-value hash" style="font-size:11px;"></div>
+				</div>
+				<div class="output-row" data-field="seedHex" style="margin-bottom:0;">
+					<div class="output-label" data-i18n="seedLabel">种子 (Hex)</div>
+					<div class="output-value hash" style="font-size:11px;"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="content-random" class="tab-content">
+	<div class="section">
+		<h2 data-i18n="randomTitle">随机钱包 - 安全随机生成地址</h2>
+		<div class="seed-area">
+			<div class="seed-bar"><div class="seed-fill" id="random-seed-fill" style="width:0%"></div></div>
+			<div class="seed-info" id="random-seed-info" data-i18n="moveMouse">移动鼠标收集随机种子...</div>
+		</div>
+		<div class="form-row">
+			<label data-i18n="orType">或在此输入随机字符:</label>
+			<input type="text" id="random-keyinput" onkeydown="seedKeyPress(event)">
+		</div>
+		<div class="form-row">
+			<label></label>
+			<button class="btn" id="random-generate" disabled onclick="generateRandom()" data-i18n="generate">生成</button>
+		</div>
+		<div style="margin-top:12px;border-top:1px solid #eee;padding-top:12px;">
+			<div class="adv-toggle" onclick="toggleAdv(this)">
+				<span data-i18n="advOptions">高级选项</span>
+				<span class="adv-arrow">&#9654;</span>
+			</div>
+			<div class="adv-content" style="display:none;margin-top:10px;">
+				<div class="form-row">
+					<label data-i18n="wordCount">单词数</label>
+					<div class="select-group">
+						<select id="random-words"><option value="12">12</option><option value="24" selected>24</option></select>
+					</div>
+				</div>
+				<div class="form-row">
+					<label data-i18n="passphrase">助记词口令 (可选)</label>
+					<input type="text" id="mnemonic-passphrase" data-i18n-placeholder="passphrasePlaceholder" disabled>
+					<label class="danger-cb"><input type="checkbox" onchange="toggleDanger(this,'mnemonic-passphrase')"> <span data-i18n="dangerCb">危险（我确信我知道我在干什么）</span></label>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="output-area" id="random-output">
+		<div class="section">
+			<h2 data-i18n="mnemonicOutput">助记词路径</h2>
+			<div class="output-row" data-field="mnemonic">
+				<div class="output-label" data-i18n="mnemonicLabel">助记词</div>
+				<div class="output-value mnemonic-words"></div>
+			</div>
+			<div class="qr-row">
+				<div class="qr-item"><div id="random-qr-segwit"></div><div class="qr-label" data-i18n="derivedSegwit">HD SegWit</div></div>
+			</div>
+			<div class="output-row" data-field="bip84">
+				<div class="output-label" data-i18n="derivedSegwit">派生 SegWit 地址 #0 (m/84'/0'/0'/0/0)</div>
+				<div class="output-value"></div>
+			</div>
+		</div>
+
+		<div class="section">
+			<h2 data-i18n="legacyTitle">Legacy 路径</h2>
+			<div style="margin:12px 0;padding:12px;background:#f8f9fa;border-radius:6px;">
+				<div class="qr-row">
+					<div class="qr-item"><div id="random-qr-p2wpkh"></div><div class="qr-label" data-i18n="p2wpkhLabel">SegWit</div></div>
+					<div class="qr-item"><div id="random-qr-wif-comp"></div><div class="qr-label" data-i18n="wifCompShort">WIF (压缩)</div></div>
+				</div>
+				<div class="output-row" data-field="p2wpkh">
+					<div class="output-label" data-i18n="p2wpkhLabel">原生 SegWit 地址 (压缩公钥)</div>
+					<div class="output-value"></div>
+				</div>
+				<div class="output-row" data-field="wifComp">
+					<div class="output-label" data-i18n="wifComp">私钥 WIF (压缩, K/L...)</div>
+					<div class="output-value"></div>
+				</div>
+			</div>
+
+			<div style="margin:12px 0;padding:12px;background:#f8f9fa;border-radius:6px;">
+				<div class="qr-row">
+					<div class="qr-item"><div id="random-qr-p2pkh"></div><div class="qr-label" data-i18n="p2pkhLabel">P2PKH</div></div>
+					<div class="qr-item"><div id="random-qr-wif"></div><div class="qr-label" data-i18n="wifUncompShort">WIF (非压缩)</div></div>
+				</div>
+				<div class="output-row" data-field="p2pkh">
+					<div class="output-label" data-i18n="p2pkhLabel">P2PKH 地址 (非压缩公钥)</div>
+					<div class="output-value"></div>
+				</div>
+				<div class="output-row" data-field="wifUncomp">
+					<div class="output-label" data-i18n="wifUncomp">私钥 WIF (非压缩, 5...)</div>
+					<div class="output-value"></div>
+				</div>
+			</div>
+		</div>
+
+		<div class="section" style="padding:8px 16px;">
+			<div class="adv-toggle" onclick="toggleAdv(this)" style="font-size:12px;color:#999;">
+				<span class="adv-arrow">&#9654;</span>
+				<span data-i18n="techDetails">技术详情 (Hex)</span>
+			</div>
+			<div class="adv-content" style="display:none;margin-top:6px;">
+				<div class="output-row" data-field="entropyHex" style="margin-bottom:6px;">
+					<div class="output-label" data-i18n="entropyLabel">熵 (Hex)</div>
+					<div class="output-value hash" style="font-size:11px;"></div>
+				</div>
+				<div class="output-row" data-field="seedHex" style="margin-bottom:0;">
+					<div class="output-label" data-i18n="seedLabel">种子 (Hex)</div>
+					<div class="output-value hash" style="font-size:11px;"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="content-mnemonic" class="tab-content">
+	<div class="section">
+		<h2 data-i18n="mnemonicTitle">助记词恢复 - 从助记词计算地址</h2>
+		<div class="form-row">
+			<label data-i18n="mnemonicLabel">助记词</label>
+			<textarea class="textarea-input" id="mnemonic-input" rows="3" data-i18n-placeholder="mnemonicPlaceholder"></textarea>
+		</div>
+		<div class="form-row">
+			<label data-i18n="passphrase">助记词口令 (可选)</label>
+			<input type="text" id="mnemonic-passphrase-recover" data-i18n-placeholder="passphrasePlaceholder">
+		</div>
+		<div class="form-row">
+			<label></label>
+			<button class="btn" onclick="recoverFromMnemonic()" data-i18n="recoverBtn">恢复</button>
+		</div>
+		<div id="mnemonic-status" style="margin-top:8px;font-size:13px;"></div>
+	</div>
+
+	<div class="output-area" id="mnemonic-output">
+		<div class="section">
+			<h2 data-i18n="segwitPath">BIP84 原生 SegWit</h2>
+			<div class="qr-row">
+				<div class="qr-item"><div id="mnemonic-qr-hd"></div><div class="qr-label" data-i18n="derivedSegwit">HD SegWit #0</div></div>
+			</div>
+			<div class="output-row" data-field="bip84_0">
+				<div class="output-label">地址 #0 (m/84'/0'/0'/0/0)</div>
+				<div class="output-value"></div>
+			</div>
+			<div class="output-row" data-field="bip84_1">
+				<div class="output-label">地址 #1 (m/84'/0'/0'/0/1)</div>
+				<div class="output-value"></div>
+			</div>
+			<div class="output-row" data-field="bip84_2">
+				<div class="output-label">地址 #2 (m/84'/0'/0'/0/2)</div>
+				<div class="output-value"></div>
+			</div>
+			<div class="output-row" data-field="bip84_3">
+				<div class="output-label">地址 #3 (m/84'/0'/0'/0/3)</div>
+				<div class="output-value"></div>
+			</div>
+			<div class="output-row" data-field="bip84_4">
+				<div class="output-label">地址 #4 (m/84'/0'/0'/0/4)</div>
+				<div class="output-value"></div>
+			</div>
+			<div class="output-row" data-field="bip84_5">
+				<div class="output-label">地址 #5 (m/84'/0'/0'/0/5)</div>
+				<div class="output-value"></div>
+			</div>
+			<div class="output-row" data-field="bip84_6">
+				<div class="output-label">地址 #6 (m/84'/0'/0'/0/6)</div>
+				<div class="output-value"></div>
+			</div>
+			<div class="output-row" data-field="bip84_7">
+				<div class="output-label">地址 #7 (m/84'/0'/0'/0/7)</div>
+				<div class="output-value"></div>
+			</div>
+			<div class="output-row" data-field="bip84_8">
+				<div class="output-label">地址 #8 (m/84'/0'/0'/0/8)</div>
+				<div class="output-value"></div>
+			</div>
+			<div class="output-row" data-field="bip84_9">
+				<div class="output-label">地址 #9 (m/84'/0'/0'/0/9)</div>
+				<div class="output-value"></div>
+			</div>
+		</div>
+
+		<div class="section" style="padding:8px 16px;">
+			<div class="adv-toggle" onclick="toggleAdv(this)" style="font-size:12px;color:#999;">
+				<span class="adv-arrow">&#9654;</span>
+				<span data-i18n="techDetails">技术详情 (Hex)</span>
+			</div>
+			<div class="adv-content" style="display:none;margin-top:6px;">
+				<div class="output-row" data-field="entropyHex" style="margin-bottom:6px;">
+					<div class="output-label" data-i18n="entropyLabel">熵 (Hex)</div>
+					<div class="output-value hash" style="font-size:11px;"></div>
+				</div>
+				<div class="output-row" data-field="seedHex" style="margin-bottom:0;">
+					<div class="output-label" data-i18n="seedLabel">种子 (Hex)</div>
+					<div class="output-value hash" style="font-size:11px;"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="content-verify" class="tab-content">
+	<div class="section">
+		<h2 data-i18n="verifyTitle">验证</h2>
+		<div class="form-row">
+			<textarea class="textarea-input" id="verify-input" rows="3" data-i18n-placeholder="verifyPlaceholder"></textarea>
+		</div>
+		<div style="font-size:11px;color:#888;margin-bottom:12px;" data-i18n="supportedFormats">支持格式: 助记词(12/24词)、私钥WIF、P2PKH地址、SegWit地址</div>
+		<div class="form-row">
+			<label></label>
+			<button class="btn" onclick="doVerify()" data-i18n="verifyBtn">验证</button>
+		</div>
+	</div>
+
+	<div class="output-area show" id="verify-output" style="display:none;">
+		<div class="section">
+			<h2 data-i18n="verifyResult">验证结果</h2>
+			<div class="test-results" id="verify-results"></div>
+		</div>
+	</div>
+</div>
+
+<div id="content-test" class="tab-content">
+	<div class="section">
+		<h2 data-i18n="selfTest">自检</h2>
+		<p style="font-size:13px;color:#888;margin-bottom:12px;" data-i18n="selfTestDesc">使用已知测试向量验证核心功能</p>
+		<button class="btn btn-sm" onclick="runSelfTest()" data-i18n="runTest">运行测试</button>
+		<div class="test-results" id="test-results" style="margin-top:12px;"></div>
+	</div>
+</div>
+
+<div style="max-width:960px;margin:0 auto;padding:0 24px 24px;text-align:center;">
+	<div style="font-size:12px;color:#999;margin-bottom:4px;">
+		<span data-i18n="donate">捐赠</span>:
+		<span style="font-family:monospace;color:#f7931a;">bc1q4yt2sa60sx38u40msye936hst6fadqxw70vhzv</span>
+	</div>
+	<div style="font-size:11px;color:#aaa;">&copy; 2026 hmisty@gmail.com</div>
+</div>
+
+<script type="text/javascript">
+//biginteger.js
+</script>
+<script type="text/javascript">
+//cryptojs.js
+</script>
+<script type="text/javascript">
+//cryptojs.sha256.js
+</script>
+<script type="text/javascript">
+//cryptojs.ripemd160.js
+</script>
+<script type="text/javascript">
+//cryptojs.hmac.js
+</script>
+<script type="text/javascript">
+//cryptojs.pbkdf2.js
+</script>
+<script type="text/javascript">
+//cryptojs.aes.js
+</script>
+<script type="text/javascript">
+//cryptojs.blockmodes.js
+</script>
+<script type="text/javascript">
+//cryptojs.sha512.js
+</script>
+<script type="text/javascript">
+//securerandom.js
+</script>
+<script type="text/javascript">
+//ellipticcurve.js
+</script>
+<script type="text/javascript">
+//bitcoinjs-lib.js
+</script>
+<script type="text/javascript">
+//bitcoinjs-lib.base58.js
+</script>
+<script type="text/javascript">
+//bitcoinjs-lib.address.js
+</script>
+<script type="text/javascript">
+//bitcoinjs-lib.ecdsa.js
+</script>
+<script type="text/javascript">
+//bitcoinjs-lib.eckey.js
+</script>
+<script type="text/javascript">
+//bitcoinjs-lib.util.js
+</script>
+<script type="text/javascript">
+//qrcode.js
+</script>
+<script type="text/javascript">
+//bech32.js
+</script>
+<script type="text/javascript">
+//bip39-wordlist-en.js
+</script>
+<script type="text/javascript">
+//bip39.js
+</script>
+<script type="text/javascript">
+//bip32.js
+</script>
+<script type="text/javascript">
+//bitcalc.js
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function() {
+	setLang('zh');
+	initRandom();
+});
+</script>
+</body>
+</html>

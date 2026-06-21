@@ -1,0 +1,20 @@
+{
+  "name": "bitcalc",
+  "version": "1.0.0",
+  "description": "Offline Bitcoin Address Calculator - Cold Wallet Generator",
+  "main": "Gruntfile.js",
+  "devDependencies": {
+    "bip32": "^5.0.1",
+    "bip39": "^3.1.0",
+    "ecpair": "^3.0.1",
+    "grunt": "^0.4.5",
+    "grunt-cli": "^1.5.0",
+    "grunt-combine": "^0.8.3",
+    "grunt-lineending": "^0.2.4",
+    "tiny-secp256k1": "^2.2.4"
+  },
+  "scripts": {
+    "build": "grunt"
+  },
+  "license": "MIT"
+}
