@@ -15,6 +15,7 @@ body {
 	padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 13px;
 }
 .lang-switch button.active { color: #fff; border-color: #f7931a; background: rgba(247,147,26,0.15); }
+.lang-switch a:hover svg { fill: #fff; }
 .tabs {
 	display: flex; background: #fff; border-bottom: 2px solid #e0e0e0;
 	padding: 0 24px; position: sticky; top: 0; z-index: 10;
