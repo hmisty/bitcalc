@@ -23,11 +23,11 @@ Existing cold wallet tools (e.g. bitaddress.org) only support Legacy P2PKH addre
 
 [BIP-361](https://www.bip361.org/) 提出了一个分阶段的量子迁移方案。其中 Phase C 计划允许用户通过**零知识证明持有 BIP-39 助记词**来恢复量子脆弱地址中的资金——这意味着**助记词是将来的量子迁移中证明所有权的关键凭证**，光有裸私钥是不够的。
 
-没有助记词，就无法参与 BIP-361 的 Phase C 恢复机制；一旦量子计算机成熟（预计 2027–2030），在链上暴露过公钥的地址可能被窃取。
+没有助记词，就无法参与 BIP-361 的 Phase C 恢复机制；一旦量子计算机成熟，在链上暴露过公钥的地址可能被窃取。
 
 [BIP-361](https://www.bip361.org/) proposes a phased quantum migration plan. Phase C plans to allow users to recover funds from quantum-vulnerable UTXOs by submitting a **zero-knowledge proof of possession of a BIP-39 seed phrase**. This means **mnemonics are the key credential for proving ownership in future quantum migration** — raw private keys alone are insufficient.
 
-Without a mnemonic, you cannot participate in BIP-361's Phase C recovery mechanism. Once a cryptographically-relevant quantum computer matures (estimated 2027–2030), addresses that have exposed their public keys on-chain could be stolen.
+Without a mnemonic, you cannot participate in BIP-361's Phase C recovery mechanism. Once a cryptographically-relevant quantum computer matures, addresses that have exposed their public keys on-chain could be stolen.
 
 > *Phase C: Users with frozen quantum vulnerable funds and a HD wallet seed phrase can construct a quantum safe proof to recover funds.* — BIP-361
 
@@ -128,6 +128,12 @@ src/
 - Merges JS/CSS into a single HTML file
 
 运行时无外部依赖。No runtime dependencies.
+
+## 免责声明 Disclaimer
+
+**本工具按"现状"提供，无任何明示或暗示的保证。** 算法和数据实现均可能存在错误，使用前请务必通过其他独立工具交叉验证生成的地址和私钥的正确性。因使用本工具而造成的任何财产损失，开发者不承担任何责任。**Use at your own risk.**
+
+**This software is provided "as is", without warranty of any kind.** The algorithms and data implementations may contain errors. Always cross-verify generated addresses and private keys using independent tools before use. The developer shall not be held liable for any financial loss resulting from the use of this software. **Use at your own risk.**
 
 ## 许可 License
 

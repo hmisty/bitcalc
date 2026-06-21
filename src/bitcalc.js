@@ -52,6 +52,7 @@ var L = {
 		techDetails: "技术详情 (Hex)",
 		loading: "计算中...",
 		donate: "捐赠",
+		disclaimer: "无担保，使用风险自负。No warranty, use at your own risk.",
 	},
 	en: {
 		title: "BitCalc Bitcoin Address Calculator",
@@ -107,6 +108,7 @@ var L = {
 		techDetails: "Technical Details (Hex)",
 		loading: "Computing...",
 		donate: "Donation",
+		disclaimer: "No warranty, use at your own risk. 无担保，使用风险自负。",
 	}
 };
 var LANG = 'zh';
