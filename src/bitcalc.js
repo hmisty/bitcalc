@@ -20,7 +20,7 @@ var L = {
 		verifyBtn: "验证",
 		supportedFormats: "支持格式: 助记词(12/24词)、私钥WIF、P2PKH地址、SegWit地址",
 		entropyLabel: "熵 (Hex)", mnemonicLabel: "助记词", seedLabel: "种子 (Hex)",
-		legacyTitle: "Legacy 路径",
+		legacyTitle: "经典路径",
 		p2pkhLabel: "P2PKH 地址", p2wpkhLabel: "原生 SegWit 地址",
 		wifUncomp: "私钥 WIF (非压缩)", wifComp: "私钥 WIF (压缩)",
 		wifUncompShort: "WIF (非压缩)", wifCompShort: "WIF (压缩)",
@@ -457,11 +457,15 @@ function doVerify() {
 
 var TESTS = {
 	entropy: '9F86D081884C7D659A2FEAA0C55AD015A3BF4F1B2B0B822CD15D6C15B0F00A08',
-	entropy12: '00000000000000000000000000000000',
+	entropy12: '9F86D081884C7D659A2FEAA0C55AD015',
 	p2pkh: '1HKqKTMpBTZZ8H5zcqYEWYBaaWELrDEXeE',
 	segwit: 'bc1qtmrl9526rusw4dnavrcfal72tz6ram5lqzutru',
 	mnemonic: 'panel custom call awesome sick ready hamster wool patch client reduce clip desk pole hole gesture lion grief firm subway force job choice bargain',
+	mnemonic12: 'panel custom call awesome sick ready hamster wool patch client reduce clay',
 	bip84_0: 'bc1qquzeycp8sfh6jwdm9pq92m6zp8vgv3p0l5fuyz',
+	bip84_0_12: 'bc1qlhycuafdegfkcdx435t2glqkyrrrrqfpdjd2nq',
+	bip84_1_12: 'bc1qn6y5jfdf5069w9mxcwjp3qeazqrvr8vltfkv4n',
+	bip84_2_12: 'bc1q9urqudztnhffup66l8hs4zzcm3a3e2v63w06fe',
 	privkeyUncomp: '5K2YUVmWfxbmvsNxCsfvArXdGXm7d5DC9pn4yD75k2UaSYgkXTh',
 	privkeyComp: 'L2ZovMyTxxQVJmMtfQemgVcB5YmiEDapDwsvX6RqvuWibgUNRiHz'
 };
@@ -515,6 +519,20 @@ function runSelfTest() {
 			check('bip84/0/0/0/0', addr, TESTS.bip84_0);
 		} else { testLog.push({ name: 'bip84 derivation', pass: false, expected: '', actual: 'seed length: ' + seed.length }); }
 	} catch(e) { testLog.push({ name: 'bip84 derivation', pass: false, expected: '', actual: e.message }); }
+
+	try {
+		var ent12 = Crypto.util.hexToBytes(TESTS.entropy12);
+		var mne12 = bip39.entropyToMnemonic(ent12, 12);
+		check('mnemonic 12-word', mne12, TESTS.mnemonic12);
+		check('mnemonic 12 validation', bip39.validateMnemonic(mne12) ? 'true' : 'false', 'true');
+		var seed12 = bip39.mnemonicToSeed(mne12, '');
+		if (seed12.length === 64) {
+			var master12 = bip32.fromSeed(seed12);
+			check('bip84/0/0/0/0 (12-word)', bip32.nodeToSegwitAddress(bip32.derivePath(master12,"m/84'/0'/0'/0/0"),'bc'), TESTS.bip84_0_12);
+			check('bip84/0/0/0/1 (12-word)', bip32.nodeToSegwitAddress(bip32.derivePath(master12,"m/84'/0'/0'/0/1"),'bc'), TESTS.bip84_1_12);
+			check('bip84/0/0/0/2 (12-word)', bip32.nodeToSegwitAddress(bip32.derivePath(master12,"m/84'/0'/0'/0/2"),'bc'), TESTS.bip84_2_12);
+		} else { testLog.push({ name: '12-word seed', pass: false, expected: '64', actual: seed12.length.toString() }); }
+	} catch(e) { testLog.push({ name: '12-word tests', pass: false, expected: '', actual: e.message }); }
 
 	var html = '';
 	var passCount = 0, failCount = 0;

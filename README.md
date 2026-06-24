@@ -13,7 +13,7 @@ A fully offline single-page HTML tool for securely generating Bitcoin addresses 
 
 ### 为什么需要 BitCalc？
 
-现有冷钱包生成工具（如 bitaddress.org）只支持 Legacy P2PKH 地址（以 `1` 开头），缺少现代钱包普遍使用的 Native SegWit 地址（bech32，以 `bc1` 开头）。此外，它们仅导出裸私钥（WIF），而不生成 BIP-39 助记词。
+现有冷钱包生成工具（如 bitaddress.org）只支持经典 P2PKH 地址（以 `1` 开头），缺少现代钱包普遍使用的 Native SegWit 地址（bech32，以 `bc1` 开头）。此外，它们仅导出裸私钥（WIF），而不生成 BIP-39 助记词。
 
 ### Why another address generator?
 
@@ -31,7 +31,7 @@ Without a mnemonic, you cannot participate in BIP-361's Phase C recovery mechani
 
 > *Phase C: Users with frozen quantum vulnerable funds and a HD wallet seed phrase can construct a quantum safe proof to recover funds.* — BIP-361
 
-**BitCalc 同时支持裸地址（Legacy + SegWit）和 BIP-39 助记词路径**，既可以满足当前的使用需求，也为未来的量子迁移做好了前置准备。
+**BitCalc 同时支持裸地址（经典 + SegWit）和 BIP-39 助记词路径**，既可以满足当前的使用需求，也为未来的量子迁移做好了前置准备。
 
 **BitCalc supports both raw addresses (Legacy + SegWit) and BIP-39 mnemonic paths** — meeting today's needs while preparing for future quantum migration.
 
@@ -43,7 +43,7 @@ Without a mnemonic, you cannot participate in BIP-361's Phase C recovery mechani
 |------|---------|------|
 | **脑钱包** | Brain Wallet | 密码 → SHA256ⁿ → 熵，可选迭代次数 / password → entropy, optional iterations |
 | **随机钱包** | Random Wallet | 鼠标/键盘收集熵 → SecureRandom / mouse + keyboard entropy collection |
-| **Legacy 路径** | Legacy Path | P2PKH (非压缩公钥) + 原生 SegWit (压缩公钥) / uncompressed + compressed keys |
+| **经典路径** | Legacy Path | P2PKH (非压缩公钥) + 原生 SegWit (压缩公钥) / uncompressed + compressed keys |
 | **助记词路径** | Mnemonic Path | BIP39 12/24 词 → BIP32 HD → m/84'/0'/0'/0/0 / mnemonic → HD wallet |
 | **助记词恢复** | Mnemonic Recovery | 输入助记词 → 恢复熵、种子、HD 地址列表 / recover addresses from mnemonic |
 | **验证** | Verify | 验证助记词校验和、私钥 WIF、地址格式 / validate mnemonic, WIF, addresses |
@@ -121,6 +121,10 @@ src/
 | | BIP84 #0: `bc1qquzeycp8sfh6jwdm9pq92m6zp8vgv3p0l5fuyz` |
 | | BIP84 #1: `bc1qv5u53h298fh3htgyxe32fwuvt9huz8e4rjjqnh` |
 | | BIP84 #2: `bc1qcfk9m6m87068jcqtxhqrsssp478x9grjjcssqs` |
+| | 12词助记词 / 12-word mnemonic: `panel custom call ... clay` |
+| | BIP84 #0 (12-word): `bc1qlhycuafdegfkcdx435t2glqkyrrrrqfpdjd2nq` |
+| | BIP84 #1 (12-word): `bc1qn6y5jfdf5069w9mxcwjp3qeazqrvr8vltfkv4n` |
+| | BIP84 #2 (12-word): `bc1q9urqudztnhffup66l8hs4zzcm3a3e2v63w06fe` |
 
 ## 依赖 Dependencies (build only)
 
