@@ -1,7 +1,7 @@
 var bip39 = {};
 
 bip39.entropyToMnemonic = function (entropyBytes, wordCount) {
-	wordCount = wordCount || 24;
+	wordCount = wordCount || 12;
 	if (entropyBytes.length !== 16 && entropyBytes.length !== 32) {
 		throw "Entropy must be 16 or 32 bytes";
 	}

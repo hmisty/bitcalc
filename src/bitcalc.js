@@ -246,13 +246,12 @@ function showBrainResults(entropy) {
 	showQrCode('brain-qr-wif', legacy.ecKeyUncomp.getBitcoinWalletImportFormat());
 	showQrCode('brain-qr-wif-comp', legacy.ecKeyComp.getBitcoinWalletImportFormat());
 
-	var wc = parseInt(document.getElementById('brain-words').value) || 24;
+	var wc = parseInt(document.getElementById('brain-words').value) || 12;
 	var entForMnem = wc === 12 ? entropy.slice(0, 16) : entropy.slice();
 	try {
 		var mnemonic = bip39.entropyToMnemonic(entForMnem, wc);
 		fillMnemonicRecovery(mnemonic, document.getElementById('brain-passphrase').value);
 		var passphrase = document.getElementById('brain-passphrase').value || '';
-		var seed = bip39.mnemonicToSeed(mnemonic, passphrase);
 		var seed = bip39.mnemonicToSeed(mnemonic, passphrase);
 		var master = bip32.fromSeed(seed);
 		var node = bip32.derivePath(master, "m/84'/0'/0'/0/0");
@@ -338,7 +337,7 @@ function showRandomResults(entropy) {
 	showQrCode('random-qr-wif', legacy.ecKeyUncomp.getBitcoinWalletImportFormat());
 	showQrCode('random-qr-wif-comp', legacy.ecKeyComp.getBitcoinWalletImportFormat());
 
-	var wc = parseInt(document.getElementById('random-words').value) || 24;
+	var wc = parseInt(document.getElementById('random-words').value) || 12;
 	var entForMnem = wc === 12 ? entropy.slice(0, 16) : entropy.slice();
 	try {
 		var mnemonic = bip39.entropyToMnemonic(entForMnem, wc);
