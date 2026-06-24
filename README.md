@@ -125,6 +125,12 @@ src/
 | | BIP84 #0 (12-word): `bc1qlhycuafdegfkcdx435t2glqkyrrrrqfpdjd2nq` |
 | | BIP84 #1 (12-word): `bc1qn6y5jfdf5069w9mxcwjp3qeazqrvr8vltfkv4n` |
 | | BIP84 #2 (12-word): `bc1q9urqudztnhffup66l8hs4zzcm3a3e2v63w06fe` |
+| 密码 `test`, 9999 次迭代 / password `test`, 9999 iterations | P2PKH: `1Mig3mSpDzbkfZ91UJsTjDnF7QJtxWtmoN` |
+| | P2WPKH: `bc1qvktvghw9veesuucxaqmsh2u20na7gedhh9f86s` |
+| | 24词助记词: `alley few pudding ... disease` |
+| | BIP84 #0 (24-word): `bc1qh67chfkpnmtp5qvs9zh9xm5meff7h4s5xcg4gn` |
+| | 12词助记词: `alley few pudding ... nasty` |
+| | BIP84 #0 (12-word): `bc1qudnacy6s0dp5zxy4qfe38dn58kdnk8pcfw5pyx` |
 
 ## 依赖 Dependencies (build only)
 

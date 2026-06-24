@@ -7241,16 +7241,25 @@ function doVerify() {
 var TESTS = {
 	entropy: '9F86D081884C7D659A2FEAA0C55AD015A3BF4F1B2B0B822CD15D6C15B0F00A08',
 	entropy12: '9F86D081884C7D659A2FEAA0C55AD015',
+	entropy9999: '068AB2B4A069C2CCBA8267FCE87433C9E259A509009B781B661C7F3E6932C521',
 	p2pkh: '1HKqKTMpBTZZ8H5zcqYEWYBaaWELrDEXeE',
+	p2pkh9999: '1Mig3mSpDzbkfZ91UJsTjDnF7QJtxWtmoN',
 	segwit: 'bc1qtmrl9526rusw4dnavrcfal72tz6ram5lqzutru',
+	segwit9999: 'bc1qvktvghw9veesuucxaqmsh2u20na7gedhh9f86s',
 	mnemonic: 'panel custom call awesome sick ready hamster wool patch client reduce clip desk pole hole gesture lion grief firm subway force job choice bargain',
 	mnemonic12: 'panel custom call awesome sick ready hamster wool patch client reduce clay',
+	mnemonic9999: 'alley few pudding dolphin order green tube erupt woman dry artefact need cereal spoon catch beach job swamp mandate wrist track offer behind disease',
+	mnemonic12_9999: 'alley few pudding dolphin order green tube erupt woman dry artefact nasty',
 	bip84_0: 'bc1qquzeycp8sfh6jwdm9pq92m6zp8vgv3p0l5fuyz',
 	bip84_0_12: 'bc1qlhycuafdegfkcdx435t2glqkyrrrrqfpdjd2nq',
+	bip84_0_9999: 'bc1qh67chfkpnmtp5qvs9zh9xm5meff7h4s5xcg4gn',
+	bip84_0_9999_12: 'bc1qudnacy6s0dp5zxy4qfe38dn58kdnk8pcfw5pyx',
 	bip84_1_12: 'bc1qn6y5jfdf5069w9mxcwjp3qeazqrvr8vltfkv4n',
 	bip84_2_12: 'bc1q9urqudztnhffup66l8hs4zzcm3a3e2v63w06fe',
 	privkeyUncomp: '5K2YUVmWfxbmvsNxCsfvArXdGXm7d5DC9pn4yD75k2UaSYgkXTh',
-	privkeyComp: 'L2ZovMyTxxQVJmMtfQemgVcB5YmiEDapDwsvX6RqvuWibgUNRiHz'
+	privkeyComp: 'L2ZovMyTxxQVJmMtfQemgVcB5YmiEDapDwsvX6RqvuWibgUNRiHz',
+	privkeyUncomp9999: '5HsAgYyyKzhH45Axx4P7umAkcRXM2DuyKJGaP87CjzZJjLZUZxo',
+	privkeyComp9999: 'KwSRjaATcqemrZQyx1vdVsx3VMEwNPzoZmDkLeNNpm3bFmeUD3Dr'
 };
 
 function runSelfTest() {
@@ -7316,6 +7325,36 @@ function runSelfTest() {
 			check('bip84/0/0/0/2 (12-word)', bip32.nodeToSegwitAddress(bip32.derivePath(master12,"m/84'/0'/0'/0/2"),'bc'), TESTS.bip84_2_12);
 		} else { testLog.push({ name: '12-word seed', pass: false, expected: '64', actual: seed12.length.toString() }); }
 	} catch(e) { testLog.push({ name: '12-word tests', pass: false, expected: '', actual: e.message }); }
+
+	try {
+		var ent9999 = Crypto.SHA256('test', {asBytes: true});
+		for (var i = 1; i < 9999; i++) ent9999 = Crypto.SHA256(ent9999, {asBytes: true});
+		var hex9999 = ''; for (var j = 0; j < ent9999.length; j++) hex9999 += ('0' + ent9999[j].toString(16)).slice(-2);
+		check('entropy 9999 iterations', hex9999.toUpperCase(), TESTS.entropy9999);
+		var ek9999 = new Bitcoin.ECKey(ent9999); ek9999.setCompressed(false);
+		check('p2pkh 9999', ek9999.getBitcoinAddress(), TESTS.p2pkh9999);
+		check('wif uncomp 9999', ek9999.getBitcoinWalletImportFormat(), TESTS.privkeyUncomp9999);
+		var ekc9999 = new Bitcoin.ECKey(ent9999); ekc9999.setCompressed(true);
+		check('wif comp 9999', ekc9999.getBitcoinWalletImportFormat(), TESTS.privkeyComp9999);
+		check('segwit 9999', bech32.encodeSegwit('bc', 0, ekc9999.getPubKeyHash()), TESTS.segwit9999);
+		var mne9999 = bip39.entropyToMnemonic(ent9999, 24);
+		check('mnemonic 9999', mne9999, TESTS.mnemonic9999);
+		check('mnemonic 9999 validation', bip39.validateMnemonic(mne9999) ? 'true' : 'false', 'true');
+		var seed9999 = bip39.mnemonicToSeed(mne9999, '');
+		if (seed9999.length === 64) {
+			var master9999 = bip32.fromSeed(seed9999);
+			check('bip84/0/0/0/0 (9999)', bip32.nodeToSegwitAddress(bip32.derivePath(master9999,"m/84'/0'/0'/0/0"),'bc'), TESTS.bip84_0_9999);
+		} else { testLog.push({ name: '9999 seed', pass: false, expected: '64', actual: seed9999.length.toString() }); }
+		var ent9999_12 = ent9999.slice(0, 16);
+		var mne9999_12 = bip39.entropyToMnemonic(ent9999_12, 12);
+		check('mnemonic12 9999', mne9999_12, TESTS.mnemonic12_9999);
+		check('mnemonic12 9999 validation', bip39.validateMnemonic(mne9999_12) ? 'true' : 'false', 'true');
+		var seed9999_12 = bip39.mnemonicToSeed(mne9999_12, '');
+		if (seed9999_12.length === 64) {
+			var master9999_12 = bip32.fromSeed(seed9999_12);
+			check('bip84/0/0/0/0 (9999-12)', bip32.nodeToSegwitAddress(bip32.derivePath(master9999_12,"m/84'/0'/0'/0/0"),'bc'), TESTS.bip84_0_9999_12);
+		} else { testLog.push({ name: '9999-12 seed', pass: false, expected: '64', actual: seed9999_12.length.toString() }); }
+	} catch(e) { testLog.push({ name: '9999 iteration tests', pass: false, expected: '', actual: e.message }); }
 
 	var html = '';
 	var passCount = 0, failCount = 0;
