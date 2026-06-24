@@ -21,7 +21,7 @@ var L = {
 		supportedFormats: "支持格式: 助记词(12/24词)、私钥WIF、P2PKH地址、SegWit地址",
 		entropyLabel: "熵 (Hex)", mnemonicLabel: "助记词", seedLabel: "种子 (Hex)",
 		legacyTitle: "经典路径",
-		p2pkhLabel: "P2PKH 地址", p2wpkhLabel: "原生 SegWit 地址",
+		p2pkhLabel: "P2PKH 地址", p2pkhComp: "P2PKH 地址 (压缩公钥)", p2wpkhLabel: "原生 SegWit 地址",
 		wifUncomp: "私钥 WIF (非压缩)", wifComp: "私钥 WIF (压缩)",
 		wifUncompShort: "WIF (非压缩)", wifCompShort: "WIF (压缩)",
 		mnemonicOutput: "助记词路径",
@@ -77,7 +77,7 @@ var L = {
 		supportedFormats: "Supported: Mnemonic(12/24 words), WIF Private Key, P2PKH Address, SegWit Address",
 		entropyLabel: "Entropy (Hex)", mnemonicLabel: "Mnemonic", seedLabel: "Seed (Hex)",
 		legacyTitle: "Legacy Path",
-		p2pkhLabel: "P2PKH Address", p2wpkhLabel: "Native SegWit Address",
+		p2pkhLabel: "P2PKH Address", p2pkhComp: "P2PKH Address (Compressed)", p2wpkhLabel: "Native SegWit Address",
 		wifUncomp: "Private Key WIF (Uncompressed)", wifComp: "Private Key WIF (Compressed)",
 		wifUncompShort: "WIF (UNCOMPRESSED)", wifCompShort: "WIF (COMPRESSED)",
 		mnemonicOutput: "Mnemonic Path",
@@ -239,11 +239,13 @@ function showBrainResults(entropy) {
 	document.querySelector('#brain-output [data-field="entropyHex"] .output-value').textContent = legacy.entropyHex;
 	document.querySelector('#brain-output [data-field="p2pkh"] .output-value').textContent = legacy.ecKeyUncomp.getBitcoinAddress();
 	document.querySelector('#brain-output [data-field="p2wpkh"] .output-value').textContent = p2wpkh;
+	document.querySelector('#brain-output [data-field="p2pkhComp"] .output-value').textContent = legacy.ecKeyComp.getBitcoinAddress();
 	document.querySelector('#brain-output [data-field="wifUncomp"] .output-value').textContent = legacy.ecKeyUncomp.getBitcoinWalletImportFormat();
 	document.querySelector('#brain-output [data-field="wifComp"] .output-value').textContent = legacy.ecKeyComp.getBitcoinWalletImportFormat();
 	showQrCode('brain-qr-p2pkh', legacy.ecKeyUncomp.getBitcoinAddress());
 	showQrCode('brain-qr-p2wpkh', p2wpkh);
 	showQrCode('brain-qr-wif', legacy.ecKeyUncomp.getBitcoinWalletImportFormat());
+	showQrCode('brain-qr-p2pkh-comp', legacy.ecKeyComp.getBitcoinAddress());
 	showQrCode('brain-qr-wif-comp', legacy.ecKeyComp.getBitcoinWalletImportFormat());
 
 	var wc = parseInt(document.getElementById('brain-words').value) || 12;
@@ -330,10 +332,12 @@ function showRandomResults(entropy) {
 	document.querySelector('#random-output [data-field="entropyHex"] .output-value').textContent = legacy.entropyHex;
 	document.querySelector('#random-output [data-field="p2pkh"] .output-value').textContent = legacy.ecKeyUncomp.getBitcoinAddress();
 	document.querySelector('#random-output [data-field="p2wpkh"] .output-value').textContent = p2wpkh;
+	document.querySelector('#random-output [data-field="p2pkhComp"] .output-value').textContent = legacy.ecKeyComp.getBitcoinAddress();
 	document.querySelector('#random-output [data-field="wifUncomp"] .output-value').textContent = legacy.ecKeyUncomp.getBitcoinWalletImportFormat();
 	document.querySelector('#random-output [data-field="wifComp"] .output-value').textContent = legacy.ecKeyComp.getBitcoinWalletImportFormat();
 	showQrCode('random-qr-p2pkh', legacy.ecKeyUncomp.getBitcoinAddress());
 	showQrCode('random-qr-p2wpkh', p2wpkh);
+	showQrCode('random-qr-p2pkh-comp', legacy.ecKeyComp.getBitcoinAddress());
 	showQrCode('random-qr-wif', legacy.ecKeyUncomp.getBitcoinWalletImportFormat());
 	showQrCode('random-qr-wif-comp', legacy.ecKeyComp.getBitcoinWalletImportFormat());
 

@@ -39,11 +39,11 @@
 
 		<div class="form-row">
 			<label data-i18n="enterPassword">输入密码</label>
-			<input type="password" id="brain-pw" data-i18n-placeholder="pwPlaceholder" onkeypress="if(event.keyCode==13)generateBrainWallet()">
+			<input type="password" id="brain-pw" data-i18n-placeholder="pwPlaceholder" autocomplete="new-password" onkeypress="if(event.keyCode==13)generateBrainWallet()">
 		</div>
 		<div class="form-row" id="brain-confirm-label">
 			<label data-i18n="confirmPassword">确认密码</label>
-			<input type="password" id="brain-confirm" data-i18n-placeholder="confirmHint" onkeypress="if(event.keyCode==13)generateBrainWallet()">
+			<input type="password" id="brain-confirm" data-i18n-placeholder="confirmHint" autocomplete="new-password" onkeypress="if(event.keyCode==13)generateBrainWallet()">
 		</div>
 		<div class="form-row">
 			<label></label>
@@ -106,10 +106,15 @@
 			<div style="margin:12px 0;padding:12px;background:#f8f9fa;border-radius:6px;">
 				<div class="qr-row">
 					<div class="qr-item"><div id="brain-qr-p2wpkh"></div><div class="qr-label" data-i18n="p2wpkhLabel">SegWit</div></div>
+					<div class="qr-item"><div id="brain-qr-p2pkh-comp"></div><div class="qr-label" data-i18n="p2pkhComp">P2PKH (压缩)</div></div>
 					<div class="qr-item"><div id="brain-qr-wif-comp"></div><div class="qr-label" data-i18n="wifCompShort">WIF (压缩)</div></div>
 				</div>
 				<div class="output-row" data-field="p2wpkh">
 					<div class="output-label" data-i18n="p2wpkhLabel">原生 SegWit 地址 (压缩公钥)</div>
+					<div class="output-value"></div>
+				</div>
+				<div class="output-row" data-field="p2pkhComp">
+					<div class="output-label" data-i18n="p2pkhComp">P2PKH 地址 (压缩公钥)</div>
 					<div class="output-value"></div>
 				</div>
 				<div class="output-row" data-field="wifComp">
@@ -210,10 +215,15 @@
 			<div style="margin:12px 0;padding:12px;background:#f8f9fa;border-radius:6px;">
 				<div class="qr-row">
 					<div class="qr-item"><div id="random-qr-p2wpkh"></div><div class="qr-label" data-i18n="p2wpkhLabel">SegWit</div></div>
+					<div class="qr-item"><div id="random-qr-p2pkh-comp"></div><div class="qr-label" data-i18n="p2pkhComp">P2PKH (压缩)</div></div>
 					<div class="qr-item"><div id="random-qr-wif-comp"></div><div class="qr-label" data-i18n="wifCompShort">WIF (压缩)</div></div>
 				</div>
 				<div class="output-row" data-field="p2wpkh">
 					<div class="output-label" data-i18n="p2wpkhLabel">原生 SegWit 地址 (压缩公钥)</div>
+					<div class="output-value"></div>
+				</div>
+				<div class="output-row" data-field="p2pkhComp">
+					<div class="output-label" data-i18n="p2pkhComp">P2PKH 地址 (压缩公钥)</div>
 					<div class="output-value"></div>
 				</div>
 				<div class="output-row" data-field="wifComp">
