@@ -43,11 +43,11 @@ Without a mnemonic, you cannot participate in BIP-361's Phase C recovery mechani
 |------|---------|------|
 | **脑钱包** | Brain Wallet | 密码 → SHA256ⁿ → 熵，可选迭代次数 / password → entropy, optional iterations |
 | **随机钱包** | Random Wallet | 鼠标/键盘收集熵 → SecureRandom / mouse + keyboard entropy collection |
-| **经典路径** | Classical Path | 压缩 P2PKH + 原生 SegWit + 非压缩 P2PKH（折叠）/ compressed + uncompressed keys & SegWit |
+| **经典路径** | Classical Path | 压缩 P2PKH + 原生 SegWit + 非压缩 P2PKH（折叠，兼容 bitaddress.org）/ compressed + uncompressed keys & SegWit, bitaddress.org compatible |
 | **助记词路径** | Mnemonic Path | BIP39 12/24 词 → BIP32 HD → m/84'/0'/0'/0/0 / mnemonic → HD wallet |
 | **助记词恢复** | Mnemonic Recovery | 输入助记词 → 恢复熵、种子、HD 地址列表 / recover addresses from mnemonic |
 | **验证** | Verify | 验证助记词校验和、私钥 WIF、地址格式 / validate mnemonic, WIF, addresses |
-| **自检** | Self Test | 27 项内置测试向量验证核心功能 / 27 built-in test vectors |
+| **自检** | Self Test | 25 项内置测试向量验证核心功能 / 25 built-in test vectors |
 | **密码复杂度** | Password Strength | 创建模式下要求 ≥30 字符 + 大小写字母 + 数字 + 特殊符号 / creation mode enforces strong password |
 | **危险保护** | Danger Guard | 高级选项默认禁用，勾选后方可编辑 / advanced options locked behind checkbox |
 | **自动填充** | Auto-fill Recovery | 生成助记词后自动填入恢复页 / generated mnemonic auto-filled to recovery tab |
@@ -60,13 +60,13 @@ Without a mnemonic, you cannot participate in BIP-361's Phase C recovery mechani
 
 ### 2026-06-24
 
-- **经典路径重构**: 分离压缩/非压缩公钥为两组，非压缩卡片默认折叠
+- **经典路径重构**: 新增压缩 P2PKH 地址，与 bitaddress.org 保持兼容；分离压缩/非压缩为两组，非压缩卡片默认折叠
 - **压缩 P2PKH**: 新增压缩公钥 P2PKH 地址显示
 - **密码保护**: 创建模式强制密码复杂度检查（≥30字符+大小写+数字+特殊符号）
 - **危险开关**: 迭代次数和助记词口令默认禁用，需勾选「危险」checkbox 方可编辑
 - **默认 12 词**: 助记词默认生成 12 词（而非 24 词）
 - **自动填充**: 生成的助记词自动填入恢复页，并清除旧结果
-- **测试向量**: 新增 12 词 + 9999 次迭代 SHA256 共 16 组测试向量（自检达 27 项）
+- **测试向量**: 新增 12 词 + 9999 次迭代 SHA256 共 14 组测试向量（自检达 25 项）
 - **加载动画**: 所有操作按钮添加旋转动画遮罩
 - **bech32 bug 修复**: `decodeSegwit` 运算符优先级问题修复
 - **密码框优化**: `autocomplete="new-password"` 阻止浏览器弹出保存密码提示
