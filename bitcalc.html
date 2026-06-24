@@ -250,18 +250,24 @@ select { outline: none; }
 				</div>
 			</div>
 
-			<div style="margin:12px 0;padding:12px;background:#f8f9fa;border-radius:6px;">
-				<div class="qr-row">
-					<div class="qr-item"><div id="brain-qr-p2pkh"></div><div class="qr-label" data-i18n="p2pkhLabel">P2PKH</div></div>
-					<div class="qr-item"><div id="brain-qr-wif"></div><div class="qr-label" data-i18n="wifUncompShort">WIF (非压缩)</div></div>
+			<div style="margin:12px 0;border:1px solid #e8e8e8;border-radius:6px;overflow:hidden;">
+				<div class="adv-toggle" onclick="toggleAdv(this)" style="padding:10px 14px;background:#f8f9fa;justify-content:space-between;">
+					<span data-i18n="uncompTitle">非压缩格式 (向下兼容)</span>
+					<span class="adv-arrow">&#9654;</span>
 				</div>
-				<div class="output-row" data-field="p2pkh">
-					<div class="output-label" data-i18n="p2pkhLabel">P2PKH 地址 (非压缩公钥)</div>
-					<div class="output-value"></div>
-				</div>
-				<div class="output-row" data-field="wifUncomp">
-					<div class="output-label" data-i18n="wifUncomp">私钥 WIF (非压缩, 5...)</div>
-					<div class="output-value"></div>
+				<div class="adv-content" style="display:none;padding:12px;">
+					<div class="qr-row">
+						<div class="qr-item"><div id="brain-qr-p2pkh"></div><div class="qr-label" data-i18n="p2pkhLabel">P2PKH</div></div>
+						<div class="qr-item"><div id="brain-qr-wif"></div><div class="qr-label" data-i18n="wifUncompShort">WIF (非压缩)</div></div>
+					</div>
+					<div class="output-row" data-field="p2pkh">
+						<div class="output-label" data-i18n="p2pkhLabel">P2PKH 地址 (非压缩公钥)</div>
+						<div class="output-value"></div>
+					</div>
+					<div class="output-row" data-field="wifUncomp">
+						<div class="output-label" data-i18n="wifUncomp">私钥 WIF (非压缩, 5...)</div>
+						<div class="output-value"></div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -359,18 +365,24 @@ select { outline: none; }
 				</div>
 			</div>
 
-			<div style="margin:12px 0;padding:12px;background:#f8f9fa;border-radius:6px;">
-				<div class="qr-row">
-					<div class="qr-item"><div id="random-qr-p2pkh"></div><div class="qr-label" data-i18n="p2pkhLabel">P2PKH</div></div>
-					<div class="qr-item"><div id="random-qr-wif"></div><div class="qr-label" data-i18n="wifUncompShort">WIF (非压缩)</div></div>
+			<div style="margin:12px 0;border:1px solid #e8e8e8;border-radius:6px;overflow:hidden;">
+				<div class="adv-toggle" onclick="toggleAdv(this)" style="padding:10px 14px;background:#f8f9fa;justify-content:space-between;">
+					<span data-i18n="uncompTitle">非压缩格式 (向下兼容)</span>
+					<span class="adv-arrow">&#9654;</span>
 				</div>
-				<div class="output-row" data-field="p2pkh">
-					<div class="output-label" data-i18n="p2pkhLabel">P2PKH 地址 (非压缩公钥)</div>
-					<div class="output-value"></div>
-				</div>
-				<div class="output-row" data-field="wifUncomp">
-					<div class="output-label" data-i18n="wifUncomp">私钥 WIF (非压缩, 5...)</div>
-					<div class="output-value"></div>
+				<div class="adv-content" style="display:none;padding:12px;">
+					<div class="qr-row">
+						<div class="qr-item"><div id="random-qr-p2pkh"></div><div class="qr-label" data-i18n="p2pkhLabel">P2PKH</div></div>
+						<div class="qr-item"><div id="random-qr-wif"></div><div class="qr-label" data-i18n="wifUncompShort">WIF (非压缩)</div></div>
+					</div>
+					<div class="output-row" data-field="p2pkh">
+						<div class="output-label" data-i18n="p2pkhLabel">P2PKH 地址 (非压缩公钥)</div>
+						<div class="output-value"></div>
+					</div>
+					<div class="output-row" data-field="wifUncomp">
+						<div class="output-label" data-i18n="wifUncomp">私钥 WIF (非压缩, 5...)</div>
+						<div class="output-value"></div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -6817,6 +6829,7 @@ var L = {
 		p2pkhLabel: "P2PKH 地址", p2pkhComp: "P2PKH 地址 (压缩公钥)", p2wpkhLabel: "原生 SegWit 地址",
 		wifUncomp: "私钥 WIF (非压缩)", wifComp: "私钥 WIF (压缩)",
 		wifUncompShort: "WIF (非压缩)", wifCompShort: "WIF (压缩)",
+		uncompTitle: "非压缩格式 (向下兼容)",
 		mnemonicOutput: "助记词路径",
 		derivedSegwit: "派生 SegWit 地址 #0 (m/84'/0'/0'/0/0)",
 		verifyResult: "验证结果",
@@ -6873,6 +6886,7 @@ var L = {
 		p2pkhLabel: "P2PKH Address", p2pkhComp: "P2PKH Address (Compressed)", p2wpkhLabel: "Native SegWit Address",
 		wifUncomp: "Private Key WIF (Uncompressed)", wifComp: "Private Key WIF (Compressed)",
 		wifUncompShort: "WIF (UNCOMPRESSED)", wifCompShort: "WIF (COMPRESSED)",
+		uncompTitle: "Uncompressed Format (Legacy)",
 		mnemonicOutput: "Mnemonic Path",
 		derivedSegwit: "Derived SegWit Address #0 (m/84'/0'/0'/0/0)",
 		verifyResult: "Verification Result",
