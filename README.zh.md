@@ -1,8 +1,8 @@
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
 # BitCalc — 离线比特币地址计算器
 
 **离线比特币地址计算器 · 比特币冷钱包生成器**
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
 一个完全离线的单页 HTML 工具，在浏览器中安全生成比特币地址，无需联网，无需服务器。
 

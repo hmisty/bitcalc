@@ -1,8 +1,8 @@
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
 # BitCalc — Offline Bitcoin Address Calculator
 
 **Offline Bitcoin Address Calculator · Cold Wallet Bitcoin Address Generator**
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
 A fully offline single-page HTML tool for securely generating Bitcoin addresses in your browser. No internet, no server required.
 
