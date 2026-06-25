@@ -7287,7 +7287,8 @@ var TESTS = {
 	privkeyUncomp: '5K2YUVmWfxbmvsNxCsfvArXdGXm7d5DC9pn4yD75k2UaSYgkXTh',
 	privkeyComp: 'L2ZovMyTxxQVJmMtfQemgVcB5YmiEDapDwsvX6RqvuWibgUNRiHz',
 	privkeyUncomp9999: '5HsAgYyyKzhH45Axx4P7umAkcRXM2DuyKJGaP87CjzZJjLZUZxo',
-	privkeyComp9999: 'KwSRjaATcqemrZQyx1vdVsx3VMEwNPzoZmDkLeNNpm3bFmeUD3Dr'
+	privkeyComp9999: 'KwSRjaATcqemrZQyx1vdVsx3VMEwNPzoZmDkLeNNpm3bFmeUD3Dr',
+	wordlistSha256: 'AD90BF3BEB7B0EB7E5ACD74727DC0DA96E0A280A258354E7293FB7E211AC03DB'
 };
 
 function runSelfTest() {
@@ -7383,6 +7384,14 @@ function runSelfTest() {
 			check('bip84/0/0/0/0 (9999-12)', bip32.nodeToSegwitAddress(bip32.derivePath(master9999_12,"m/84'/0'/0'/0/0"),'bc'), TESTS.bip84_0_9999_12);
 		} else { testLog.push({ name: '9999-12 seed', pass: false, expected: '64', actual: seed9999_12.length.toString() }); }
 	} catch(e) { testLog.push({ name: '9999 iteration tests', pass: false, expected: '', actual: e.message }); }
+
+	try {
+		// 校验值来自 BIP-39 官方词表: curl -s https://raw.githubusercontent.com/bitcoin/bips/master/bip-0039/english.txt | tr -d '\n\r' | sha256sum
+		var ws = BIP39_WORDLIST_EN.join('');
+		var wh = Crypto.SHA256(ws, { asBytes: true });
+		var whHex = ''; for (var j = 0; j < wh.length; j++) whHex += ('0' + wh[j].toString(16)).slice(-2);
+		check('BIP39 wordlist SHA256', whHex.toUpperCase(), TESTS.wordlistSha256);
+	} catch(e) { testLog.push({ name: 'wordlist integrity', pass: false, expected: '', actual: e.message }); }
 
 	var html = '';
 	var passCount = 0, failCount = 0;

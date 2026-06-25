@@ -1,3 +1,5 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 # BitCalc — 离线比特币地址计算器
 
 **离线比特币地址计算器 · 比特币冷钱包生成器**
