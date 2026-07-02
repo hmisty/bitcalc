@@ -41,6 +41,7 @@ jobs:
           mkdir -p _deploy
           cp bitcalc.html _deploy/index.html
           cp README.md _deploy/
+          echo bitcalc.blockcoach.com > _deploy/CNAME
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

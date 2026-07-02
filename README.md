@@ -154,4 +154,4 @@ Portions sourced from [bitaddress.org](https://github.com/pointbiz/bitaddress.or
 
 ---
 
-**Donation:** `bc1q4yt2sa60sx38u40msye936hst6fadqxw70vhzv`
+**Donation:** `bc1qq5eqsmqmlkrjnd6y7hwhyuv73vrkrp2pg8ma2s`
