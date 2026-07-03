@@ -38,20 +38,17 @@ jobs:
 
       - name: Prepare deployment
         run: |
-          mkdir -p _deploy
-          cp bitcalc.html _deploy/index.html
-          cp README.md _deploy/
-          echo bitcalc.blockcoach.com > _deploy/CNAME
+          cp bitcalc.html index.html
+          echo bitcalc.blockcoach.com > CNAME
+          rm -rf node_modules
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
-        with:
-          fqdn: bitcalc.blockcoach.com
 
-      - name: Upload Pages artifact
+      - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./_deploy
+          path: '.'
 
       - name: Deploy to GitHub Pages
         id: deployment
