@@ -42,16 +42,6 @@ jobs:
           echo bitcalc.blockcoach.com > CNAME
           rm -rf node_modules
 
-      - name: Set custom domain via API
-        run: |
-          echo "Setting custom domain: bitcalc.blockcoach.com"
-          curl -s -X PUT \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/${{ github.repository }}/pages \
-            -d '{"cname":"bitcalc.blockcoach.com"}' \
-            --fail-with-body || echo "API call failed (might need manual setup in Settings)"
-
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
@@ -63,3 +53,13 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Set custom domain via API
+        run: |
+          echo "Setting custom domain: bitcalc.blockcoach.com"
+          curl -s -X PUT \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/${{ github.repository }}/pages \
+            -d '{"cname":"bitcalc.blockcoach.com"}' \
+            --fail-with-body || echo "Note: API call failed, may need manual setup"
