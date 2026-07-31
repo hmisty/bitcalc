@@ -70,13 +70,6 @@ body {
 .qr-item { text-align: center; }
 .qr-item canvas { display: block; margin: 0 auto 4px; }
 .qr-label { font-size: 11px; color: #888; }
-.seed-area { margin: 16px 0; }
-.seed-bar {
-	background: #e8e8e8; border: 1px solid #d0d0d0; border-radius: 4px;
-	height: 20px; margin-bottom: 8px; position: relative; overflow: hidden;
-}
-.seed-fill { position: absolute; top: 0; left: 0; height: 100%; background: #f7931a; border-radius: 2px; transition: width 0.3s; }
-.seed-info { font-size: 12px; color: #888; }
 .select-group { display: flex; gap: 8px; align-items: center; }
 .select-group select {
 	padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;

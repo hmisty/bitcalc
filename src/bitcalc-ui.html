@@ -8,7 +8,7 @@
 	</style>
 </head>
 <body onclick="if(typeof SecureRandom!=='undefined')SecureRandom.seedTime();"
-	onmousemove="seedRandom(event);">
+	onmousemove="seedRandom(event);" onkeydown="seedKeyPress(event);">
 <div class="loading-overlay" id="loading-overlay">
 	<div class="loading-spinner"></div>
 	<div class="loading-text" data-i18n="loading">计算中...</div>
@@ -169,17 +169,9 @@
 		<h2 data-i18n="randomTitle">随机钱包 - 安全随机生成地址</h2>
 		<div class="crypto-status crypto-ok" id="random-crypto-ok" style="display:none;" data-i18n="cryptoOk">✔ 安全：浏览器安全密码随机源可用</div>
 		<div class="crypto-status crypto-warn" id="random-crypto-warn" style="display:none;" data-i18n="cryptoWarn">⚠ 警告：浏览器安全密码随机源不可用</div>
-		<div class="seed-area">
-			<div class="seed-bar"><div class="seed-fill" id="random-seed-fill" style="width:0%"></div></div>
-			<div class="seed-info" id="random-seed-info" data-i18n="moveMouse">移动鼠标收集随机种子...</div>
-		</div>
-		<div class="form-row">
-			<label data-i18n="orType">或在此输入随机字符:</label>
-			<input type="text" id="random-keyinput" onkeydown="seedKeyPress(event)">
-		</div>
 		<div class="form-row">
 			<label></label>
-			<button class="btn" id="random-generate" disabled onclick="generateRandom()" data-i18n="generate">生成</button>
+			<button class="btn" id="random-generate" onclick="generateRandom()" data-i18n="generate">生成</button>
 		</div>
 		<div style="margin-top:12px;border-top:1px solid #eee;padding-top:12px;">
 			<div class="adv-toggle" onclick="toggleAdv(this)">
@@ -476,7 +468,6 @@
 <script type="text/javascript">
 document.addEventListener('DOMContentLoaded', function() {
 	setLang('zh');
-	initRandom();
 	checkCryptoSupport();
 });
 </script>

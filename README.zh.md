@@ -56,9 +56,9 @@
 - **移除安全路径中的 `Math.random()`**: `Crypto.util.randomBytes` 改用 SecureRandom 生成器（`crypto.getRandomValues` XOR 混合 ArcFour PRNG，与 bitaddress.org 核心一致）；ISO 10126 填充与 AES-CBC IV 随之变安全。`seedLimit` 改用安全 `randomBytes` 派生（同 bitaddress.org 的 `ninja.seeder.js`）
 - **私钥始终 256 位**: 随机钱包经典路径私钥（P2PKH/SegWit/WIF）始终生成 32 字节（256 位）。12 词助记词取前 16 字节（128 位熵，符合 BIP39）；24 词用全部 32 字节
 - **池重新播种 (poolDirty)**: ArcFour 状态在每次输出前，若检测到新播种数据则用最新熵池重新初始化——鼠标/键盘播种不再会因早期随机数调用而被静默忽略（修复了 bitaddress.org 留作 TODO 的潜在缺陷）
-- **播种进度门禁**: `generateRandom()` 在随机种子收集达到 100% 之前拒绝执行，即使通过控制台直接调用绕过禁用的按钮
+- **不再强制播种门禁**: 移除强制的「晃动鼠标」进度条——生成按钮立即可用。密钥材料来自操作系统级 CSPRNG（`crypto.getRandomValues`）；鼠标/键盘/`performance.now()` 熵仍被动混入熵池，作为零成本的额外防线（XOR 混合，CSPRNG 正常时无害，异常时提供兜底层）
 - **无安全 RNG 时失败关闭**: `SecureRandom.nextBytes` 在 `window.crypto.getRandomValues` 不可用时直接抛异常——拒绝生成，不再静默回退到弱的 ArcFour/Math.random 路径。`randomBytes` 仅对非密钥材料用途（如 seedLimit 计数器）回退 Math.random
-- **高精度时间熵**: `seedRandom`/`seedKeyPress` 现混入 `performance.now()`（亚毫秒精度）到熵池，在无 crypto 环境下大幅增强播种
+- **高精度时间熵**: 被动 `seedRandom`/`seedKeyPress` 混入 `performance.now()`（亚毫秒精度）到熵池
 - **免责声明**: 页脚免责声明改为黑色文字，并标注「预览版」
 
 ### 2026-06-24
@@ -95,8 +95,7 @@ npm run build
 ## 安全说明
 
 - **必须离线使用**：请在断开网络的机器上生成冷钱包。确认浏览器无法访问互联网后再操作。
-- **使用安全上下文**：请通过 HTTPS（或本地文件）生成钱包。在纯 HTTP 下 `window.crypto.getRandomValues` 不可用，密钥材料将退化为 ArcFour 池——此时工具会显示红色警告横幅
-- **完成种子收集**：生成按钮在随机种子收集达到 100% 前保持禁用。即使直接调用 `generateRandom()`，未达 100% 也会被拒绝执行
+- **使用安全上下文**：请通过 HTTPS（或本地文件）生成钱包。在纯 HTTP 下 `window.crypto.getRandomValues` 不可用，生成会被拒绝（fail-closed）——此时工具会显示红色警告横幅
 - **关闭后密钥不可恢复**：本工具不保存任何数据。刷新或关闭页面后，当前生成的密钥将永久丢失（除非已抄写备份）。
 - **打印纸质备份**：建议将生成的地址和私钥打印出来，密封保存（冷存储）。请勿以电子形式存储私钥。
 - **验证完整性**：使用前可通过 SHA256 校验 `bitcalc.html` 的完整性。

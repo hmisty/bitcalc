@@ -12,10 +12,6 @@ var L = {
 		randomTitle: "随机钱包 - 安全随机生成地址",
 		cryptoOk: "✔ 安全：浏览器安全密码随机源 (window.crypto.getRandomValues) 可用",
 		cryptoWarn: "⚠ 警告：浏览器安全密码随机源 (window.crypto.getRandomValues) 不可用！私钥生成安全性将大幅降低，请使用现代浏览器并通过 HTTPS 访问本页面。",
-		moveMouse: "移动鼠标收集随机种子...",
-		seedingRequired: "⚠ 请先完成随机种子收集（100%）再生成",
-		orType: "或在此输入随机字符:",
-		seeded: "随机种子已收集",
 		mnemonicTitle: "助记词恢复 - 从助记词计算地址",
 		segwitDerivation: "派生路径",
 		verifyTitle: "验证",
@@ -72,10 +68,6 @@ var L = {
 		randomTitle: "Random Wallet - Secure Random Address",
 		cryptoOk: "✔ Secure: browser cryptographic RNG (window.crypto.getRandomValues) available",
 		cryptoWarn: "⚠ Warning: browser cryptographic RNG (window.crypto.getRandomValues) unavailable! Private key generation security is greatly reduced. Use a modern browser over HTTPS.",
-		moveMouse: "Move mouse to collect randomness...",
-		seedingRequired: "⚠ Complete randomness collection (100%) before generating",
-		orType: "Or type random characters here:",
-		seeded: "Randomness collected",
 		mnemonicTitle: "Mnemonic Recovery - Address from Mnemonic",
 		segwitDerivation: "Derivation Path",
 		verifyTitle: "Verify",
@@ -275,12 +267,10 @@ function showBrainResults(entropy) {
 	}
 }
 
-var seedCount = 0, seedLimit = 0, isSeeding = true, lastInputTime = 0;
-
 // Mix high-resolution timing (performance.now, sub-millisecond precision)
 // into the entropy pool. Far harder for an attacker to predict than
-// Date.now()'s millisecond granularity — most valuable when
-// crypto.getRandomValues is unavailable (seeding is then the only entropy).
+// Date.now()'s millisecond granularity — a passive extra layer of entropy
+// on top of the OS-level CSPRNG (crypto.getRandomValues).
 function seedHighResTiming() {
 	if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
 		var t1 = Math.floor(performance.now() * 1000);
@@ -290,22 +280,11 @@ function seedHighResTiming() {
 	}
 }
 
-function initRandom() {
-	// Number of mouse movements required — same approach as bitaddress.org
-	// ninja.seeder.js: derive from secure randomBytes, never Math.random().
-	seedLimit = 200 + Crypto.util.randomBytes(12)[11];
-	seedCount = 0; isSeeding = true;
-	document.getElementById('random-seed-info').textContent = '0%';
-	document.getElementById('random-seed-fill').style.width = '0%';
-	document.getElementById('random-generate').disabled = true;
-}
-
 // Detect whether the browser provides a cryptographically secure RNG.
 // Uses the exact same feature check as SecureRandom.nextBytes(). When
 // window.crypto.getRandomValues is missing (e.g. plain-HTTP non-secure
-// context or legacy browser), key material falls back to the ArcFour PRNG
-// whose initial pool is built from Math.random() + timestamp + browser
-// fingerprint — NOT cryptographically secure. Warn the user in that case.
+// context or legacy browser), nextBytes fails closed (throws) and no key
+// material is produced. Warn the user in that case.
 function checkCryptoSupport() {
 	var ok = !!(window.crypto && window.crypto.getRandomValues && window.Uint8Array);
 	var okEl = document.getElementById('random-crypto-ok');
@@ -314,52 +293,28 @@ function checkCryptoSupport() {
 	if (warnEl) warnEl.style.display = ok ? 'none' : 'block';
 }
 
+// Passive seeding only: mouse/keyboard/timing entropy is mixed into the
+// pool continuously, but is NOT required and never gates generation. The
+// actual key material comes from crypto.getRandomValues (OS-level CSPRNG);
+// the pooled PRNG output is XOR-mixed on top as a zero-cost extra layer
+// (harmless when the CSPRNG is sound, a fallback layer if it ever isn't).
 function seedRandom(evt) {
-	if (!isSeeding) return;
-	var ts = new Date().getTime();
-	if (seedCount >= seedLimit) {
-		isSeeding = false;
-		document.getElementById('random-generate').disabled = false;
-		document.getElementById('random-seed-info').textContent = t('seeded') + ' 100%';
-		return;
-	}
-	if (evt && evt.clientX !== undefined && (ts - lastInputTime) > 40) {
+	if (evt && evt.clientX !== undefined) {
 		SecureRandom.seedTime();
 		SecureRandom.seedInt16((evt.clientX * evt.clientY));
 		seedHighResTiming();
-		seedCount++;
-		var pct = Math.round((seedCount / seedLimit) * 100);
-		document.getElementById('random-seed-info').textContent = pct + '%';
-		document.getElementById('random-seed-fill').style.width = pct + '%';
-		lastInputTime = ts;
 	}
 }
 
 function seedKeyPress(evt) {
-	if (!isSeeding) return;
-	if (seedCount >= seedLimit) { isSeeding = false; document.getElementById('random-generate').disabled = false; return; }
 	if (evt.which) {
-		var ts = new Date().getTime();
 		SecureRandom.seedTime();
 		SecureRandom.seedInt8(evt.which);
-		SecureRandom.seedInt8(ts - lastInputTime);
 		seedHighResTiming();
-		seedCount++;
-		var pct = Math.round((seedCount / seedLimit) * 100);
-		document.getElementById('random-seed-info').textContent = pct + '%';
-		document.getElementById('random-seed-fill').style.width = pct + '%';
-		lastInputTime = ts;
 	}
 }
 
 function generateRandom() {
-	// Defense in depth: even if the disabled UI button is bypassed (e.g.
-	// generateRandom() invoked from the console), refuse to generate
-	// until randomness collection reaches 100%.
-	if (isSeeding || seedCount < seedLimit) {
-		document.getElementById('random-seed-info').textContent = t('seedingRequired');
-		return;
-	}
 	showLoading();
 	setTimeout(function() {
 	try {
@@ -375,7 +330,7 @@ function generateRandom() {
 		// Fail closed: without a secure RNG (see SecureRandom.nextBytes)
 		// we refuse to generate from weak randomness. The red warning
 		// banner is already visible in this case.
-		document.getElementById('random-seed-info').textContent = t('cryptoWarn');
+		alert(t('cryptoWarn'));
 	}
 	hideLoading();
 	}, 30);

@@ -56,9 +56,9 @@ Without a mnemonic, you cannot participate in BIP-361's Phase C recovery mechani
 - **Removed `Math.random()` from security-sensitive paths**: `Crypto.util.randomBytes` now uses the SecureRandom generator (`crypto.getRandomValues` XOR pooled ArcFour PRNG, same as bitaddress.org's core); ISO 10126 padding and AES-CBC IV generation are secure as a result. `seedLimit` is derived from secure `randomBytes` like bitaddress.org's `ninja.seeder.js`
 - **Always 256-bit private keys**: Random wallet now always generates 32 bytes (256 bits) for the legacy-path private key (P2PKH/SegWit/WIF). 12-word mnemonics use the first 16 bytes (128-bit entropy, per BIP39); 24-word mnemonics use all 32 bytes
 - **Pool reseeding (poolDirty)**: The ArcFour PRNG state is re-keyed from the entropy pool before every output whenever new entropy has been seeded — mouse/keyboard seeding can no longer be silently ignored after an early RNG use (fixes a latent flaw that bitaddress.org leaves as a TODO)
-- **Seeding gate**: `generateRandom()` refuses to run until randomness collection reaches 100%, even if invoked directly via console, bypassing the disabled UI button
+- **No more forced seeding gate**: The mandatory "shake the mouse" progress bar is removed — the generate button works immediately. Key material comes from the OS-level CSPRNG (`crypto.getRandomValues`); mouse/keyboard/`performance.now()` entropy is still mixed passively into the pool as a zero-cost extra layer (XOR-mixed, harmless when the CSPRNG is sound, a fallback layer if it ever isn't)
 - **Fail-closed without a secure RNG**: `SecureRandom.nextBytes` now throws when `window.crypto.getRandomValues` is unavailable — generation is refused instead of silently falling back to the weak ArcFour/Math.random path. `randomBytes` only falls back to Math.random for non-key-material usage (e.g. the seedLimit counter)
-- **High-resolution timing entropy**: `seedRandom`/`seedKeyPress` now mix `performance.now()` (sub-millisecond precision) into the pool, greatly strengthening seeding when crypto is unavailable
+- **High-resolution timing entropy**: passive `seedRandom`/`seedKeyPress` mix `performance.now()` (sub-millisecond precision) into the pool
 - **Disclaimer**: Footer disclaimer changed to black text and marked "Preview version"
 
 ### 2026-06-24
@@ -95,8 +95,7 @@ Output: `bitcalc.html` — a portable single-file HTML.
 ## Security Notes
 
 - **Use offline only**: Disconnect from the internet before generating wallets. Verify your browser cannot reach any network.
-- **Use a secure context**: Generate wallets over HTTPS (or a local file). On plain HTTP, `window.crypto.getRandomValues` is unavailable and key material falls back to the ArcFour PRNG — the tool shows a red warning banner in that case
-- **Complete the seeding bar**: The generate button stays disabled until 100% randomness collection (mouse/keyboard). `generateRandom()` refuses to run before that, even if called directly
+- **Use a secure context**: Generate wallets over HTTPS (or a local file). On plain HTTP, `window.crypto.getRandomValues` is unavailable and generation is refused (fail-closed) — the tool shows a red warning banner in that case
 - **Keys are ephemeral**: This tool stores nothing. Refreshing or closing the page will permanently lose the generated keys.
 - **Paper backup**: Print and seal your wallet. Never store private keys digitally.
 - **Verify integrity**: Check the SHA256 hash of `bitcalc.html` before use.
