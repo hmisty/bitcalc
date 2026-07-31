@@ -7160,8 +7160,11 @@ function generateRandom() {
 	showLoading();
 	setTimeout(function() {
 	var sr = new SecureRandom();
-	var entropyLen = parseInt(document.getElementById('random-words').value) === 12 ? 16 : 32;
-	var entropy = new Array(entropyLen);
+	// Always generate 32 bytes (256 bits): a raw Bitcoin private key must
+	// have full 256-bit strength (bitaddress.org generates 32-byte keys).
+	// For a 12-word BIP39 mnemonic only the first 16 bytes are used as
+	// mnemonic entropy (128 bits, per BIP39); 24 words use all 32 bytes.
+	var entropy = new Array(32);
 	sr.nextBytes(entropy);
 	showRandomResults(entropy);
 	hideLoading();
