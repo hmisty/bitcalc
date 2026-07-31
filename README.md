@@ -33,7 +33,8 @@ Without a mnemonic, you cannot participate in BIP-361's Phase C recovery mechani
 | Feature | Description |
 |---------|-------------|
 | **Brain Wallet** | Password → SHA256ⁿ → entropy, optional iterations |
-| **Random Wallet** | Mouse + keyboard entropy collection → SecureRandom PRNG |
+| **Random Wallet** | Mouse + keyboard entropy collection → SecureRandom PRNG (always 256-bit keys) |
+| **Crypto RNG Indicator** | Banner shows whether `window.crypto.getRandomValues` is available; warns when it is not |
 | **Classical Path** | Compressed P2PKH + Native SegWit + uncompressed P2PKH (collapsed, bitaddress.org compatible) |
 | **Mnemonic Path** | BIP39 12/24 words → PBKDF2 → BIP32 HD → m/84'/0'/0'/0/0 |
 | **Mnemonic Recovery** | Input mnemonic → recover entropy, seed, HD address list |
@@ -48,6 +49,15 @@ Without a mnemonic, you cannot participate in BIP-361's Phase C recovery mechani
 | **Fully Offline** | Single HTML file, open in any browser |
 
 ## Changelog
+
+### 2026-08-01 — Random Number Security Hardening
+
+- **Crypto RNG availability banner**: Random wallet tab shows a green ✔ / red ⚠ banner indicating whether `window.crypto.getRandomValues` is available. When unavailable (plain-HTTP or legacy browser) it warns that private key generation security is greatly reduced
+- **Removed `Math.random()` from security-sensitive paths**: `Crypto.util.randomBytes` now uses the SecureRandom generator (`crypto.getRandomValues` XOR pooled ArcFour PRNG, same as bitaddress.org's core); ISO 10126 padding and AES-CBC IV generation are secure as a result. `seedLimit` is derived from secure `randomBytes` like bitaddress.org's `ninja.seeder.js`
+- **Always 256-bit private keys**: Random wallet now always generates 32 bytes (256 bits) for the legacy-path private key (P2PKH/SegWit/WIF). 12-word mnemonics use the first 16 bytes (128-bit entropy, per BIP39); 24-word mnemonics use all 32 bytes
+- **Pool reseeding (poolDirty)**: The ArcFour PRNG state is re-keyed from the entropy pool before every output whenever new entropy has been seeded — mouse/keyboard seeding can no longer be silently ignored after an early RNG use (fixes a latent flaw that bitaddress.org leaves as a TODO)
+- **Seeding gate**: `generateRandom()` refuses to run until randomness collection reaches 100%, even if invoked directly via console, bypassing the disabled UI button
+- **Disclaimer**: Footer disclaimer changed to black text and marked "Preview version"
 
 ### 2026-06-24
 
@@ -83,6 +93,8 @@ Output: `bitcalc.html` — a portable single-file HTML.
 ## Security Notes
 
 - **Use offline only**: Disconnect from the internet before generating wallets. Verify your browser cannot reach any network.
+- **Use a secure context**: Generate wallets over HTTPS (or a local file). On plain HTTP, `window.crypto.getRandomValues` is unavailable and key material falls back to the ArcFour PRNG — the tool shows a red warning banner in that case
+- **Complete the seeding bar**: The generate button stays disabled until 100% randomness collection (mouse/keyboard). `generateRandom()` refuses to run before that, even if called directly
 - **Keys are ephemeral**: This tool stores nothing. Refreshing or closing the page will permanently lose the generated keys.
 - **Paper backup**: Print and seal your wallet. Never store private keys digitally.
 - **Verify integrity**: Check the SHA256 hash of `bitcalc.html` before use.
@@ -97,7 +109,7 @@ src/
 ├── cryptojs.*.js          ← from bitaddress.org (SHA256, RIPEMD160, HMAC, PBKDF2, AES)
 ├── ellipticcurve.js       ← from bitaddress.org (secp256k1 elliptic curve)
 ├── bitcoinjs-lib.*.js     ← from bitaddress.org (Base58, ECKey, address encoding)
-├── securerandom.js        ← from bitaddress.org (ArcFour PRNG secure random)
+├── securerandom.js        ← from bitaddress.org, hardened (poolDirty reseeding: ArcFour state is re-keyed from the entropy pool before every output once new entropy is seeded)
 ├── qrcode.js              ← from bitaddress.org (QR code generation)
 ├── cryptojs.sha512.js     ★ New (SHA-512, required by BIP39 PBKDF2)
 ├── bech32.js              ★ New (Bech32 encoding for Native SegWit addresses)

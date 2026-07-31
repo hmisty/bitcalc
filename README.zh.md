@@ -33,7 +33,8 @@
 | 功能 | 说明 |
 |------|------|
 | **脑钱包** | 密码 → SHA256ⁿ → 熵，可选迭代次数 |
-| **随机钱包** | 鼠标/键盘收集熵 → SecureRandom |
+| **随机钱包** | 鼠标/键盘收集熵 → SecureRandom（私钥始终 256 位） |
+| **随机源安全提示** | 横幅显示 `window.crypto.getRandomValues` 是否可用；不可用时红色警告 |
 | **经典路径** | 压缩 P2PKH + 原生 SegWit + 非压缩 P2PKH（折叠，兼容 bitaddress.org） |
 | **助记词路径** | BIP39 12/24 词 → BIP32 HD → m/84'/0'/0'/0/0 |
 | **助记词恢复** | 输入助记词 → 恢复熵、种子、HD 地址列表 |
@@ -48,6 +49,15 @@
 | **完全离线** | 单 HTML 文件，浏览器直接打开 |
 
 ## 更新日志
+
+### 2026-08-01 — 随机数安全加固
+
+- **随机源安全提示横幅**: 随机钱包页显示绿色 ✔ / 红色 ⚠ 横幅，指示 `window.crypto.getRandomValues` 是否可用。不可用（HTTP 非安全上下文或老浏览器）时明确警告私钥生成安全性将大幅降低
+- **移除安全路径中的 `Math.random()`**: `Crypto.util.randomBytes` 改用 SecureRandom 生成器（`crypto.getRandomValues` XOR 混合 ArcFour PRNG，与 bitaddress.org 核心一致）；ISO 10126 填充与 AES-CBC IV 随之变安全。`seedLimit` 改用安全 `randomBytes` 派生（同 bitaddress.org 的 `ninja.seeder.js`）
+- **私钥始终 256 位**: 随机钱包经典路径私钥（P2PKH/SegWit/WIF）始终生成 32 字节（256 位）。12 词助记词取前 16 字节（128 位熵，符合 BIP39）；24 词用全部 32 字节
+- **池重新播种 (poolDirty)**: ArcFour 状态在每次输出前，若检测到新播种数据则用最新熵池重新初始化——鼠标/键盘播种不再会因早期随机数调用而被静默忽略（修复了 bitaddress.org 留作 TODO 的潜在缺陷）
+- **播种进度门禁**: `generateRandom()` 在随机种子收集达到 100% 之前拒绝执行，即使通过控制台直接调用绕过禁用的按钮
+- **免责声明**: 页脚免责声明改为黑色文字，并标注「预览版」
 
 ### 2026-06-24
 
@@ -83,6 +93,8 @@ npm run build
 ## 安全说明
 
 - **必须离线使用**：请在断开网络的机器上生成冷钱包。确认浏览器无法访问互联网后再操作。
+- **使用安全上下文**：请通过 HTTPS（或本地文件）生成钱包。在纯 HTTP 下 `window.crypto.getRandomValues` 不可用，密钥材料将退化为 ArcFour 池——此时工具会显示红色警告横幅
+- **完成种子收集**：生成按钮在随机种子收集达到 100% 前保持禁用。即使直接调用 `generateRandom()`，未达 100% 也会被拒绝执行
 - **关闭后密钥不可恢复**：本工具不保存任何数据。刷新或关闭页面后，当前生成的密钥将永久丢失（除非已抄写备份）。
 - **打印纸质备份**：建议将生成的地址和私钥打印出来，密封保存（冷存储）。请勿以电子形式存储私钥。
 - **验证完整性**：使用前可通过 SHA256 校验 `bitcalc.html` 的完整性。
@@ -97,7 +109,7 @@ src/
 ├── cryptojs.*.js          ← 来自 bitaddress.org (SHA256, RIPEMD160, HMAC, PBKDF2, AES)
 ├── ellipticcurve.js       ← 来自 bitaddress.org (secp256k1 椭圆曲线)
 ├── bitcoinjs-lib.*.js     ← 来自 bitaddress.org (Base58, ECKey, 地址编码)
-├── securerandom.js        ← 来自 bitaddress.org (ArcFour PRNG 安全随机数)
+├── securerandom.js        ← 来自 bitaddress.org，已加固（poolDirty 重新播种：检测到新熵时在输出前用最新熵池重新初始化 ArcFour 状态）
 ├── qrcode.js              ← 来自 bitaddress.org (QR 码生成)
 ├── cryptojs.sha512.js     ★ 新增 (SHA-512, BIP39 PBKDF2 所需)
 ├── bech32.js              ★ 新增 (Bech32 编码, 原生 SegWit 地址)
