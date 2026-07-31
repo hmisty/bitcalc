@@ -170,7 +170,10 @@
 		<div class="crypto-status crypto-ok" id="random-crypto-ok" style="display:none;" data-i18n="cryptoOk">✔ 安全：浏览器安全密码随机源可用</div>
 		<div class="crypto-status crypto-warn" id="random-crypto-warn" style="display:none;" data-i18n="cryptoWarn">⚠ 警告：浏览器安全密码随机源不可用</div>
 		<div class="form-row">
-			<label></label>
+			<div class="entropy-indicator" title="">
+				<span class="entropy-dot"></span>
+				<span id="entropy-text" data-i18n="entropyMixing">额外熵混合中…</span>
+			</div>
 			<button class="btn" id="random-generate" onclick="generateRandom()" data-i18n="generate">生成</button>
 		</div>
 		<div style="margin-top:12px;border-top:1px solid #eee;padding-top:12px;">

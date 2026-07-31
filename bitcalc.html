@@ -87,6 +87,18 @@ body {
 .check-row input[type="checkbox"] { cursor: pointer; }
 .status-ok { color: #28a745; font-weight: 600; }
 .status-bad { color: #dc3545; font-weight: 600; }
+.entropy-indicator {
+	display: flex; align-items: center; gap: 6px; min-width: 120px;
+	font-size: 12px; color: #888; white-space: nowrap;
+}
+.entropy-dot {
+	width: 8px; height: 8px; border-radius: 50%; background: #f7931a;
+	animation: entropy-pulse 1.6s ease-in-out infinite;
+}
+@keyframes entropy-pulse {
+	0%, 100% { opacity: 0.35; transform: scale(0.85); }
+	50% { opacity: 1; transform: scale(1.15); }
+}
 .crypto-status { font-size: 12px; border-radius: 4px; padding: 8px 12px; margin: 0 0 12px; line-height: 1.5; }
 .crypto-ok { background: #e8f5e9; color: #1e7e34; border: 1px solid #b7dfb9; }
 .crypto-warn { background: #fdecea; color: #c62828; border: 1px solid #f5c6cb; font-weight: 600; }
@@ -293,7 +305,10 @@ select { outline: none; }
 		<div class="crypto-status crypto-ok" id="random-crypto-ok" style="display:none;" data-i18n="cryptoOk">✔ 安全：浏览器安全密码随机源可用</div>
 		<div class="crypto-status crypto-warn" id="random-crypto-warn" style="display:none;" data-i18n="cryptoWarn">⚠ 警告：浏览器安全密码随机源不可用</div>
 		<div class="form-row">
-			<label></label>
+			<div class="entropy-indicator" title="">
+				<span class="entropy-dot"></span>
+				<span id="entropy-text" data-i18n="entropyMixing">额外熵混合中…</span>
+			</div>
 			<button class="btn" id="random-generate" onclick="generateRandom()" data-i18n="generate">生成</button>
 		</div>
 		<div style="margin-top:12px;border-top:1px solid #eee;padding-top:12px;">
@@ -6835,6 +6850,8 @@ var L = {
 		randomTitle: "随机钱包 - 安全随机生成地址",
 		cryptoOk: "✔ 安全：浏览器安全密码随机源 (window.crypto.getRandomValues) 可用",
 		cryptoWarn: "⚠ 警告：浏览器安全密码随机源 (window.crypto.getRandomValues) 不可用！私钥生成安全性将大幅降低，请使用现代浏览器并通过 HTTPS 访问本页面。",
+		entropyMixing: "额外熵混合中…",
+		entropyMixed: "已混合额外熵：",
 		mnemonicTitle: "助记词恢复 - 从助记词计算地址",
 		segwitDerivation: "派生路径",
 		verifyTitle: "验证",
@@ -6891,6 +6908,8 @@ var L = {
 		randomTitle: "Random Wallet - Secure Random Address",
 		cryptoOk: "✔ Secure: browser cryptographic RNG (window.crypto.getRandomValues) available",
 		cryptoWarn: "⚠ Warning: browser cryptographic RNG (window.crypto.getRandomValues) unavailable! Private key generation security is greatly reduced. Use a modern browser over HTTPS.",
+		entropyMixing: "Mixing extra entropy...",
+		entropyMixed: "Extra entropy mixed: ",
 		mnemonicTitle: "Mnemonic Recovery - Address from Mnemonic",
 		segwitDerivation: "Derivation Path",
 		verifyTitle: "Verify",
@@ -6960,6 +6979,11 @@ function setLang(lang) {
 	document.querySelectorAll('.lang-btn').forEach(function(b) {
 		b.classList.toggle('active', b.getAttribute('data-lang') === lang);
 	});
+	// Keep the passive entropy counter visible after language switch
+	if (typeof entropyMixedBytes !== 'undefined' && entropyMixedBytes > 0) {
+		var et = document.getElementById('entropy-text');
+		if (et) et.textContent = t('entropyMixed') + ' ' + entropyMixedBytes + ' B';
+	}
 }
 
 function showTab(name) {
@@ -7094,14 +7118,41 @@ function showBrainResults(entropy) {
 // into the entropy pool. Far harder for an attacker to predict than
 // Date.now()'s millisecond granularity — a passive extra layer of entropy
 // on top of the OS-level CSPRNG (crypto.getRandomValues).
+//
+// Two values are mixed per event:
+//   1. the absolute high-res timestamp (microsecond scale), and
+//   2. the inter-event delta since the previous call — real scheduling
+//      jitter between mouse/keyboard events. (Do NOT sample performance
+//      .now() twice back-to-back: the samples are quantized and almost
+//      always identical, so their XOR is useless.)
+var _lastHighResNow = 0;
 function seedHighResTiming() {
 	if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
-		var t1 = Math.floor(performance.now() * 1000);
-		var t2 = Math.floor(performance.now() * 1000);
-		SecureRandom.seedInt(t1);
-		SecureRandom.seedInt(t1 ^ t2);
+		var t = Math.floor(performance.now() * 1000);
+		SecureRandom.seedInt(t);
+		var delta = (_lastHighResNow === 0) ? 0 : (t - _lastHighResNow) & 0xffffffff;
+		if (delta !== 0) SecureRandom.seedInt(delta);
+		_lastHighResNow = t;
 	}
 }
+
+// Passive extra-entropy indicator: count how many bytes of mouse/keyboard/
+// timing entropy have been mixed into the pool since page load, and show it
+// next to the generate button (throttled DOM update, ~10 fps).
+var entropyMixedBytes = 0, lastEntropyUiUpdate = 0;
+(function () {
+	var origSeedInt8 = SecureRandom.seedInt8;
+	SecureRandom.seedInt8 = function (x) {
+		origSeedInt8.call(SecureRandom, x);
+		entropyMixedBytes++;
+		var now = Date.now();
+		if (now - lastEntropyUiUpdate > 100) {
+			lastEntropyUiUpdate = now;
+			var el = document.getElementById('entropy-text');
+			if (el) el.textContent = t('entropyMixed') + ' ' + entropyMixedBytes + ' B';
+		}
+	};
+})();
 
 // Detect whether the browser provides a cryptographically secure RNG.
 // Uses the exact same feature check as SecureRandom.nextBytes(). When
