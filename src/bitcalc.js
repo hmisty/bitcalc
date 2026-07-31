@@ -10,6 +10,8 @@ var L = {
 		pwErrDigit: "密码需包含数字", pwErrSpecial: "密码需包含特殊字符", iterations: "迭代次数",
 		generate: "生成", showPw: "显示?", wordCount: "单词数",
 		randomTitle: "随机钱包 - 安全随机生成地址",
+		cryptoOk: "✔ 安全：浏览器安全密码随机源 (window.crypto.getRandomValues) 可用",
+		cryptoWarn: "⚠ 警告：浏览器安全密码随机源 (window.crypto.getRandomValues) 不可用！私钥生成安全性将大幅降低，请使用现代浏览器并通过 HTTPS 访问本页面。",
 		moveMouse: "移动鼠标收集随机种子...",
 		orType: "或在此输入随机字符:",
 		seeded: "随机种子已收集",
@@ -67,6 +69,8 @@ var L = {
 		pwErrSpecial: "Password must contain special characters", iterations: "Iterations",
 		generate: "Generate", showPw: "Show?", wordCount: "Words",
 		randomTitle: "Random Wallet - Secure Random Address",
+		cryptoOk: "✔ Secure: browser cryptographic RNG (window.crypto.getRandomValues) available",
+		cryptoWarn: "⚠ Warning: browser cryptographic RNG (window.crypto.getRandomValues) unavailable! Private key generation security is greatly reduced. Use a modern browser over HTTPS.",
 		moveMouse: "Move mouse to collect randomness...",
 		orType: "Or type random characters here:",
 		seeded: "Randomness collected",
@@ -277,6 +281,20 @@ function initRandom() {
 	document.getElementById('random-seed-info').textContent = '0%';
 	document.getElementById('random-seed-fill').style.width = '0%';
 	document.getElementById('random-generate').disabled = true;
+}
+
+// Detect whether the browser provides a cryptographically secure RNG.
+// Uses the exact same feature check as SecureRandom.nextBytes(). When
+// window.crypto.getRandomValues is missing (e.g. plain-HTTP non-secure
+// context or legacy browser), key material falls back to the ArcFour PRNG
+// whose initial pool is built from Math.random() + timestamp + browser
+// fingerprint — NOT cryptographically secure. Warn the user in that case.
+function checkCryptoSupport() {
+	var ok = !!(window.crypto && window.crypto.getRandomValues && window.Uint8Array);
+	var okEl = document.getElementById('random-crypto-ok');
+	var warnEl = document.getElementById('random-crypto-warn');
+	if (okEl) okEl.style.display = ok ? 'block' : 'none';
+	if (warnEl) warnEl.style.display = ok ? 'none' : 'block';
 }
 
 function seedRandom(evt) {

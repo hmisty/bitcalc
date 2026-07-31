@@ -94,6 +94,9 @@ body {
 .check-row input[type="checkbox"] { cursor: pointer; }
 .status-ok { color: #28a745; font-weight: 600; }
 .status-bad { color: #dc3545; font-weight: 600; }
+.crypto-status { font-size: 12px; border-radius: 4px; padding: 8px 12px; margin: 0 0 12px; line-height: 1.5; }
+.crypto-ok { background: #e8f5e9; color: #1e7e34; border: 1px solid #b7dfb9; }
+.crypto-warn { background: #fdecea; color: #c62828; border: 1px solid #f5c6cb; font-weight: 600; }
 .textarea-input {
 	width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;
 	font-family: "SF Mono", "Monaco", "Inconsolata", "Fira Code", monospace;
@@ -294,6 +297,8 @@ select { outline: none; }
 <div id="content-random" class="tab-content active">
 	<div class="section">
 		<h2 data-i18n="randomTitle">随机钱包 - 安全随机生成地址</h2>
+		<div class="crypto-status crypto-ok" id="random-crypto-ok" style="display:none;" data-i18n="cryptoOk">✔ 安全：浏览器安全密码随机源可用</div>
+		<div class="crypto-status crypto-warn" id="random-crypto-warn" style="display:none;" data-i18n="cryptoWarn">⚠ 警告：浏览器安全密码随机源不可用</div>
 		<div class="seed-area">
 			<div class="seed-bar"><div class="seed-fill" id="random-seed-fill" style="width:0%"></div></div>
 			<div class="seed-info" id="random-seed-info" data-i18n="moveMouse">移动鼠标收集随机种子...</div>
@@ -6815,6 +6820,8 @@ var L = {
 		pwErrDigit: "密码需包含数字", pwErrSpecial: "密码需包含特殊字符", iterations: "迭代次数",
 		generate: "生成", showPw: "显示?", wordCount: "单词数",
 		randomTitle: "随机钱包 - 安全随机生成地址",
+		cryptoOk: "✔ 安全：浏览器安全密码随机源 (window.crypto.getRandomValues) 可用",
+		cryptoWarn: "⚠ 警告：浏览器安全密码随机源 (window.crypto.getRandomValues) 不可用！私钥生成安全性将大幅降低，请使用现代浏览器并通过 HTTPS 访问本页面。",
 		moveMouse: "移动鼠标收集随机种子...",
 		orType: "或在此输入随机字符:",
 		seeded: "随机种子已收集",
@@ -6872,6 +6879,8 @@ var L = {
 		pwErrSpecial: "Password must contain special characters", iterations: "Iterations",
 		generate: "Generate", showPw: "Show?", wordCount: "Words",
 		randomTitle: "Random Wallet - Secure Random Address",
+		cryptoOk: "✔ Secure: browser cryptographic RNG (window.crypto.getRandomValues) available",
+		cryptoWarn: "⚠ Warning: browser cryptographic RNG (window.crypto.getRandomValues) unavailable! Private key generation security is greatly reduced. Use a modern browser over HTTPS.",
 		moveMouse: "Move mouse to collect randomness...",
 		orType: "Or type random characters here:",
 		seeded: "Randomness collected",
@@ -7082,6 +7091,20 @@ function initRandom() {
 	document.getElementById('random-seed-info').textContent = '0%';
 	document.getElementById('random-seed-fill').style.width = '0%';
 	document.getElementById('random-generate').disabled = true;
+}
+
+// Detect whether the browser provides a cryptographically secure RNG.
+// Uses the exact same feature check as SecureRandom.nextBytes(). When
+// window.crypto.getRandomValues is missing (e.g. plain-HTTP non-secure
+// context or legacy browser), key material falls back to the ArcFour PRNG
+// whose initial pool is built from Math.random() + timestamp + browser
+// fingerprint — NOT cryptographically secure. Warn the user in that case.
+function checkCryptoSupport() {
+	var ok = !!(window.crypto && window.crypto.getRandomValues && window.Uint8Array);
+	var okEl = document.getElementById('random-crypto-ok');
+	var warnEl = document.getElementById('random-crypto-warn');
+	if (okEl) okEl.style.display = ok ? 'block' : 'none';
+	if (warnEl) warnEl.style.display = ok ? 'none' : 'block';
 }
 
 function seedRandom(evt) {
@@ -7441,6 +7464,7 @@ function toggleDanger(cb, inputId) {
 document.addEventListener('DOMContentLoaded', function() {
 	setLang('zh');
 	initRandom();
+	checkCryptoSupport();
 });
 </script>
 </body>
