@@ -1861,8 +1861,16 @@ if (typeof Crypto == "undefined" || !Crypto.util) {
 
 			// Generate an array of any length of random bytes
 			randomBytes: function (n) {
-				for (var bytes = []; n > 0; n--)
-					bytes.push(Math.floor(Math.random() * 256));
+				var bytes = new Array(n);
+				// Cryptographically secure: use the same generator as
+				// SecureRandom.nextBytes() (bitaddress.org) — crypto.getRandomValues
+				// XOR'd with the pooled ArcFour PRNG. Math.random() is NEVER
+				// suitable for security-sensitive bytes (IVs, padding, …).
+				if (typeof SecureRandom !== 'undefined') {
+					new SecureRandom().nextBytes(bytes);
+				} else {
+					for (var i = 0; i < n; i++) bytes[i] = Math.floor(Math.random() * 256);
+				}
 				return bytes;
 			},
 
@@ -2899,8 +2907,11 @@ if (typeof Crypto == "undefined" || !Crypto.util) {
 	C_pad.iso10126 = {
 		pad: function (cipher, message) {
 			var reqd = _requiredPadding(cipher, message);
+			// Random padding bytes must be cryptographically secure
+			// (see Crypto.util.randomBytes).
+			var rb = C.util.randomBytes(reqd - 1);
 			for (var i = 1; i < reqd; i++) {
-				message.push(Math.floor(Math.random() * 256));
+				message.push(rb[i - 1]);
 			}
 			message.push(reqd);
 		},
@@ -7086,7 +7097,9 @@ function showBrainResults(entropy) {
 var seedCount = 0, seedLimit = 0, isSeeding = true, lastInputTime = 0;
 
 function initRandom() {
-	seedLimit = 200 + Math.floor(Math.random() * 100);
+	// Number of mouse movements required — same approach as bitaddress.org
+	// ninja.seeder.js: derive from secure randomBytes, never Math.random().
+	seedLimit = 200 + Crypto.util.randomBytes(12)[11];
 	seedCount = 0; isSeeding = true;
 	document.getElementById('random-seed-info').textContent = '0%';
 	document.getElementById('random-seed-fill').style.width = '0%';

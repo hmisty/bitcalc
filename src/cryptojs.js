@@ -43,8 +43,16 @@ if (typeof Crypto == "undefined" || !Crypto.util) {
 
 			// Generate an array of any length of random bytes
 			randomBytes: function (n) {
-				for (var bytes = []; n > 0; n--)
-					bytes.push(Math.floor(Math.random() * 256));
+				var bytes = new Array(n);
+				// Cryptographically secure: use the same generator as
+				// SecureRandom.nextBytes() (bitaddress.org) — crypto.getRandomValues
+				// XOR'd with the pooled ArcFour PRNG. Math.random() is NEVER
+				// suitable for security-sensitive bytes (IVs, padding, …).
+				if (typeof SecureRandom !== 'undefined') {
+					new SecureRandom().nextBytes(bytes);
+				} else {
+					for (var i = 0; i < n; i++) bytes[i] = Math.floor(Math.random() * 256);
+				}
 				return bytes;
 			},
 

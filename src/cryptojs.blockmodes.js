@@ -117,8 +117,11 @@
 	C_pad.iso10126 = {
 		pad: function (cipher, message) {
 			var reqd = _requiredPadding(cipher, message);
+			// Random padding bytes must be cryptographically secure
+			// (see Crypto.util.randomBytes).
+			var rb = C.util.randomBytes(reqd - 1);
 			for (var i = 1; i < reqd; i++) {
-				message.push(Math.floor(Math.random() * 256));
+				message.push(rb[i - 1]);
 			}
 			message.push(reqd);
 		},

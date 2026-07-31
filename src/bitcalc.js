@@ -276,7 +276,9 @@ function showBrainResults(entropy) {
 var seedCount = 0, seedLimit = 0, isSeeding = true, lastInputTime = 0;
 
 function initRandom() {
-	seedLimit = 200 + Math.floor(Math.random() * 100);
+	// Number of mouse movements required — same approach as bitaddress.org
+	// ninja.seeder.js: derive from secure randomBytes, never Math.random().
+	seedLimit = 200 + Crypto.util.randomBytes(12)[11];
 	seedCount = 0; isSeeding = true;
 	document.getElementById('random-seed-info').textContent = '0%';
 	document.getElementById('random-seed-fill').style.width = '0%';
