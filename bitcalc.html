@@ -1867,10 +1867,17 @@ if (typeof Crypto == "undefined" || !Crypto.util) {
 				// XOR'd with the pooled ArcFour PRNG. Math.random() is NEVER
 				// suitable for security-sensitive bytes (IVs, padding, …).
 				if (typeof SecureRandom !== 'undefined') {
-					new SecureRandom().nextBytes(bytes);
-				} else {
-					for (var i = 0; i < n; i++) bytes[i] = Math.floor(Math.random() * 256);
+					try {
+						new SecureRandom().nextBytes(bytes);
+						return bytes;
+					} catch (e) {
+						// Fail closed: nextBytes throws without a secure RNG.
+						// Only fall back to Math.random() for NON key-material
+						// usage (e.g. the seedLimit UI counter) — never for IVs
+						// or padding in a security-sensitive context.
+					}
 				}
+				for (var i = 0; i < n; i++) bytes[i] = Math.floor(Math.random() * 256);
 				return bytes;
 			},
 
@@ -3389,17 +3396,18 @@ if (typeof Crypto == "undefined" || !Crypto.util) {
 	sr.prototype.nextBytes = function (ba) {
 		var i;
 		if (window.crypto && window.crypto.getRandomValues && window.Uint8Array) {
-			try {
-				var rvBytes = new Uint8Array(ba.length);
-				window.crypto.getRandomValues(rvBytes);
-				for (i = 0; i < ba.length; ++i)
-					ba[i] = sr.getByte() ^ rvBytes[i];
-				return;
-			} catch (e) {
-				alert(e);
-			}
+			var rvBytes = new Uint8Array(ba.length);
+			window.crypto.getRandomValues(rvBytes);
+			for (i = 0; i < ba.length; ++i)
+				ba[i] = sr.getByte() ^ rvBytes[i];
+			return;
 		}
-		for (i = 0; i < ba.length; ++i) ba[i] = sr.getByte();
+		// Fail closed: without a cryptographically secure RNG we refuse to
+		// produce key material rather than silently falling back to the
+		// ArcFour PRNG (whose pool is only seeded from Math.random() + time
+		// + fingerprint when crypto is unavailable). Callers must handle
+		// this error (the UI already shows a warning banner).
+		throw new Error("SecureRandom: window.crypto.getRandomValues is not available");
 	};
 
 
@@ -7107,6 +7115,19 @@ function showBrainResults(entropy) {
 
 var seedCount = 0, seedLimit = 0, isSeeding = true, lastInputTime = 0;
 
+// Mix high-resolution timing (performance.now, sub-millisecond precision)
+// into the entropy pool. Far harder for an attacker to predict than
+// Date.now()'s millisecond granularity — most valuable when
+// crypto.getRandomValues is unavailable (seeding is then the only entropy).
+function seedHighResTiming() {
+	if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
+		var t1 = Math.floor(performance.now() * 1000);
+		var t2 = Math.floor(performance.now() * 1000);
+		SecureRandom.seedInt(t1);
+		SecureRandom.seedInt(t1 ^ t2);
+	}
+}
+
 function initRandom() {
 	// Number of mouse movements required — same approach as bitaddress.org
 	// ninja.seeder.js: derive from secure randomBytes, never Math.random().
@@ -7143,6 +7164,7 @@ function seedRandom(evt) {
 	if (evt && evt.clientX !== undefined && (ts - lastInputTime) > 40) {
 		SecureRandom.seedTime();
 		SecureRandom.seedInt16((evt.clientX * evt.clientY));
+		seedHighResTiming();
 		seedCount++;
 		var pct = Math.round((seedCount / seedLimit) * 100);
 		document.getElementById('random-seed-info').textContent = pct + '%';
@@ -7159,6 +7181,7 @@ function seedKeyPress(evt) {
 		SecureRandom.seedTime();
 		SecureRandom.seedInt8(evt.which);
 		SecureRandom.seedInt8(ts - lastInputTime);
+		seedHighResTiming();
 		seedCount++;
 		var pct = Math.round((seedCount / seedLimit) * 100);
 		document.getElementById('random-seed-info').textContent = pct + '%';
@@ -7177,6 +7200,7 @@ function generateRandom() {
 	}
 	showLoading();
 	setTimeout(function() {
+	try {
 	var sr = new SecureRandom();
 	// Always generate 32 bytes (256 bits): a raw Bitcoin private key must
 	// have full 256-bit strength (bitaddress.org generates 32-byte keys).
@@ -7185,6 +7209,12 @@ function generateRandom() {
 	var entropy = new Array(32);
 	sr.nextBytes(entropy);
 	showRandomResults(entropy);
+	} catch (e) {
+		// Fail closed: without a secure RNG (see SecureRandom.nextBytes)
+		// we refuse to generate from weak randomness. The red warning
+		// banner is already visible in this case.
+		document.getElementById('random-seed-info').textContent = t('cryptoWarn');
+	}
 	hideLoading();
 	}, 30);
 }

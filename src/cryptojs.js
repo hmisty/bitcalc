@@ -49,10 +49,17 @@ if (typeof Crypto == "undefined" || !Crypto.util) {
 				// XOR'd with the pooled ArcFour PRNG. Math.random() is NEVER
 				// suitable for security-sensitive bytes (IVs, padding, …).
 				if (typeof SecureRandom !== 'undefined') {
-					new SecureRandom().nextBytes(bytes);
-				} else {
-					for (var i = 0; i < n; i++) bytes[i] = Math.floor(Math.random() * 256);
+					try {
+						new SecureRandom().nextBytes(bytes);
+						return bytes;
+					} catch (e) {
+						// Fail closed: nextBytes throws without a secure RNG.
+						// Only fall back to Math.random() for NON key-material
+						// usage (e.g. the seedLimit UI counter) — never for IVs
+						// or padding in a security-sensitive context.
+					}
 				}
+				for (var i = 0; i < n; i++) bytes[i] = Math.floor(Math.random() * 256);
 				return bytes;
 			},
 

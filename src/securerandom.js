@@ -30,17 +30,18 @@
 	sr.prototype.nextBytes = function (ba) {
 		var i;
 		if (window.crypto && window.crypto.getRandomValues && window.Uint8Array) {
-			try {
-				var rvBytes = new Uint8Array(ba.length);
-				window.crypto.getRandomValues(rvBytes);
-				for (i = 0; i < ba.length; ++i)
-					ba[i] = sr.getByte() ^ rvBytes[i];
-				return;
-			} catch (e) {
-				alert(e);
-			}
+			var rvBytes = new Uint8Array(ba.length);
+			window.crypto.getRandomValues(rvBytes);
+			for (i = 0; i < ba.length; ++i)
+				ba[i] = sr.getByte() ^ rvBytes[i];
+			return;
 		}
-		for (i = 0; i < ba.length; ++i) ba[i] = sr.getByte();
+		// Fail closed: without a cryptographically secure RNG we refuse to
+		// produce key material rather than silently falling back to the
+		// ArcFour PRNG (whose pool is only seeded from Math.random() + time
+		// + fingerprint when crypto is unavailable). Callers must handle
+		// this error (the UI already shows a warning banner).
+		throw new Error("SecureRandom: window.crypto.getRandomValues is not available");
 	};
 
 

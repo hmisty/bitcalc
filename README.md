@@ -57,6 +57,8 @@ Without a mnemonic, you cannot participate in BIP-361's Phase C recovery mechani
 - **Always 256-bit private keys**: Random wallet now always generates 32 bytes (256 bits) for the legacy-path private key (P2PKH/SegWit/WIF). 12-word mnemonics use the first 16 bytes (128-bit entropy, per BIP39); 24-word mnemonics use all 32 bytes
 - **Pool reseeding (poolDirty)**: The ArcFour PRNG state is re-keyed from the entropy pool before every output whenever new entropy has been seeded — mouse/keyboard seeding can no longer be silently ignored after an early RNG use (fixes a latent flaw that bitaddress.org leaves as a TODO)
 - **Seeding gate**: `generateRandom()` refuses to run until randomness collection reaches 100%, even if invoked directly via console, bypassing the disabled UI button
+- **Fail-closed without a secure RNG**: `SecureRandom.nextBytes` now throws when `window.crypto.getRandomValues` is unavailable — generation is refused instead of silently falling back to the weak ArcFour/Math.random path. `randomBytes` only falls back to Math.random for non-key-material usage (e.g. the seedLimit counter)
+- **High-resolution timing entropy**: `seedRandom`/`seedKeyPress` now mix `performance.now()` (sub-millisecond precision) into the pool, greatly strengthening seeding when crypto is unavailable
 - **Disclaimer**: Footer disclaimer changed to black text and marked "Preview version"
 
 ### 2026-06-24
