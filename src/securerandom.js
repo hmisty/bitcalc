@@ -62,7 +62,15 @@
 				sr.poolCopyOnInit[sr.pptr] = sr.pool[sr.pptr];
 			sr.pptr = 0;
 		}
-		// TODO: allow reseeding after first request
+		// Re-key the PRNG state from the entropy pool whenever new entropy has
+		// been seeded since the last output byte. This makes seeding (mouse /
+		// keyboard / …) take effect immediately, even if the pool was already
+		// consumed by an earlier getByte() call (bitaddress.org leaves this as
+		// a TODO and relies on UI discipline instead).
+		if (sr.poolDirty) {
+			sr.state.init(sr.pool);
+			sr.poolDirty = false;
+		}
 		return sr.state.next();
 	}
 
@@ -84,6 +92,7 @@
 	sr.seedInt8 = function (x) {
 		sr.pool[sr.pptr++] ^= x & 255;
 		if (sr.pptr >= sr.poolSize) sr.pptr -= sr.poolSize;
+		sr.poolDirty = true;
 	}
 
 	// Arcfour is a PRNG

@@ -13,6 +13,7 @@ var L = {
 		cryptoOk: "✔ 安全：浏览器安全密码随机源 (window.crypto.getRandomValues) 可用",
 		cryptoWarn: "⚠ 警告：浏览器安全密码随机源 (window.crypto.getRandomValues) 不可用！私钥生成安全性将大幅降低，请使用现代浏览器并通过 HTTPS 访问本页面。",
 		moveMouse: "移动鼠标收集随机种子...",
+		seedingRequired: "⚠ 请先完成随机种子收集（100%）再生成",
 		orType: "或在此输入随机字符:",
 		seeded: "随机种子已收集",
 		mnemonicTitle: "助记词恢复 - 从助记词计算地址",
@@ -72,6 +73,7 @@ var L = {
 		cryptoOk: "✔ Secure: browser cryptographic RNG (window.crypto.getRandomValues) available",
 		cryptoWarn: "⚠ Warning: browser cryptographic RNG (window.crypto.getRandomValues) unavailable! Private key generation security is greatly reduced. Use a modern browser over HTTPS.",
 		moveMouse: "Move mouse to collect randomness...",
+		seedingRequired: "⚠ Complete randomness collection (100%) before generating",
 		orType: "Or type random characters here:",
 		seeded: "Randomness collected",
 		mnemonicTitle: "Mnemonic Recovery - Address from Mnemonic",
@@ -336,6 +338,13 @@ function seedKeyPress(evt) {
 }
 
 function generateRandom() {
+	// Defense in depth: even if the disabled UI button is bypassed (e.g.
+	// generateRandom() invoked from the console), refuse to generate
+	// until randomness collection reaches 100%.
+	if (isSeeding || seedCount < seedLimit) {
+		document.getElementById('random-seed-info').textContent = t('seedingRequired');
+		return;
+	}
 	showLoading();
 	setTimeout(function() {
 	var sr = new SecureRandom();
