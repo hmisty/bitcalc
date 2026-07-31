@@ -33,7 +33,8 @@ Without a mnemonic, you cannot participate in BIP-361's Phase C recovery mechani
 | Feature | Description |
 |---------|-------------|
 | **Brain Wallet** | Password → SHA256ⁿ → entropy, optional iterations |
-| **Random Wallet** | Mouse + keyboard entropy collection → SecureRandom PRNG (always 256-bit keys) |
+| **Random Wallet** | OS-level CSPRNG (`crypto.getRandomValues`) + passive entropy mixing (always 256-bit keys) |
+| **Entropy Indicator** | Live counter next to the generate button showing passively mixed entropy bytes (pulsing dot) |
 | **Crypto RNG Indicator** | Banner shows whether `window.crypto.getRandomValues` is available; warns when it is not |
 | **Classical Path** | Compressed P2PKH + Native SegWit + uncompressed P2PKH (collapsed, bitaddress.org compatible) |
 | **Mnemonic Path** | BIP39 12/24 words → PBKDF2 → BIP32 HD → m/84'/0'/0'/0/0 |
@@ -58,7 +59,8 @@ Without a mnemonic, you cannot participate in BIP-361's Phase C recovery mechani
 - **Pool reseeding (poolDirty)**: The ArcFour PRNG state is re-keyed from the entropy pool before every output whenever new entropy has been seeded — mouse/keyboard seeding can no longer be silently ignored after an early RNG use (fixes a latent flaw that bitaddress.org leaves as a TODO)
 - **No more forced seeding gate**: The mandatory "shake the mouse" progress bar is removed — the generate button works immediately. Key material comes from the OS-level CSPRNG (`crypto.getRandomValues`); mouse/keyboard/`performance.now()` entropy is still mixed passively into the pool as a zero-cost extra layer (XOR-mixed, harmless when the CSPRNG is sound, a fallback layer if it ever isn't)
 - **Fail-closed without a secure RNG**: `SecureRandom.nextBytes` now throws when `window.crypto.getRandomValues` is unavailable — generation is refused instead of silently falling back to the weak ArcFour/Math.random path. `randomBytes` only falls back to Math.random for non-key-material usage (e.g. the seedLimit counter)
-- **High-resolution timing entropy**: passive `seedRandom`/`seedKeyPress` mix `performance.now()` (sub-millisecond precision) into the pool
+- **High-resolution timing entropy**: passive `seedRandom`/`seedKeyPress` mix `performance.now()` — one absolute microsecond timestamp plus the inter-event delta since the previous call (real scheduling jitter; the naive two-samples-XOR approach was dead code, both samples being quantized to the same value)
+- **Entropy mixing indicator**: pulsing dot + live byte counter next to the generate button, showing how much mouse/keyboard/timing entropy has been passively mixed into the pool (throttled DOM updates, survives language switch)
 - **Disclaimer**: Footer disclaimer changed to black text and marked "Preview version"
 
 ### 2026-06-24

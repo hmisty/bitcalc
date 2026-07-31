@@ -33,7 +33,8 @@
 | 功能 | 说明 |
 |------|------|
 | **脑钱包** | 密码 → SHA256ⁿ → 熵，可选迭代次数 |
-| **随机钱包** | 鼠标/键盘收集熵 → SecureRandom（私钥始终 256 位） |
+| **随机钱包** | 操作系统级 CSPRNG（`crypto.getRandomValues`）+ 被动熵混合（私钥始终 256 位） |
+| **熵混合指示器** | 生成按钮左侧实时显示被动混入的熵字节数（脉冲圆点动画） |
 | **随机源安全提示** | 横幅显示 `window.crypto.getRandomValues` 是否可用；不可用时红色警告 |
 | **经典路径** | 压缩 P2PKH + 原生 SegWit + 非压缩 P2PKH（折叠，兼容 bitaddress.org） |
 | **助记词路径** | BIP39 12/24 词 → BIP32 HD → m/84'/0'/0'/0/0 |
@@ -58,7 +59,8 @@
 - **池重新播种 (poolDirty)**: ArcFour 状态在每次输出前，若检测到新播种数据则用最新熵池重新初始化——鼠标/键盘播种不再会因早期随机数调用而被静默忽略（修复了 bitaddress.org 留作 TODO 的潜在缺陷）
 - **不再强制播种门禁**: 移除强制的「晃动鼠标」进度条——生成按钮立即可用。密钥材料来自操作系统级 CSPRNG（`crypto.getRandomValues`）；鼠标/键盘/`performance.now()` 熵仍被动混入熵池，作为零成本的额外防线（XOR 混合，CSPRNG 正常时无害，异常时提供兜底层）
 - **无安全 RNG 时失败关闭**: `SecureRandom.nextBytes` 在 `window.crypto.getRandomValues` 不可用时直接抛异常——拒绝生成，不再静默回退到弱的 ArcFour/Math.random 路径。`randomBytes` 仅对非密钥材料用途（如 seedLimit 计数器）回退 Math.random
-- **高精度时间熵**: 被动 `seedRandom`/`seedKeyPress` 混入 `performance.now()`（亚毫秒精度）到熵池
+- **高精度时间熵**: 被动 `seedRandom`/`seedKeyPress` 混入 `performance.now()`——一个绝对微秒时间戳 + 距上次事件的时间间隔（真实调度抖动；原先两次采样 XOR 的方式是死代码，两次采样因量化必然同值）
+- **熵混合指示器**: 生成按钮左侧脉冲圆点 + 实时字节计数，显示被动混入熵池的鼠标/键盘/时间熵总量（节流更新 DOM，切换语言不丢失）
 - **免责声明**: 页脚免责声明改为黑色文字，并标注「预览版」
 
 ### 2026-06-24
