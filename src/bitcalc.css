@@ -95,6 +95,7 @@ body {
 }
 .crypto-status { font-size: 12px; border-radius: 4px; padding: 8px 12px; margin: 0 0 12px; line-height: 1.5; }
 .crypto-ok { background: #e8f5e9; color: #1e7e34; border: 1px solid #b7dfb9; }
+.crypto-mid { background: #fff8e1; color: #b26a00; border: 1px solid #ffd54f; }
 .crypto-warn { background: #fdecea; color: #c62828; border: 1px solid #f5c6cb; font-weight: 600; }
 .textarea-input {
 	width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;

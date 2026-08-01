@@ -37,9 +37,10 @@
 	<div class="section">
 		<h2 data-i18n="brainTitle">脑钱包 - 从密码生成地址</h2>
 
+		<div class="crypto-status" id="brain-entropy-bar" style="display:none;"></div>
 		<div class="form-row">
 			<label data-i18n="enterPassword">输入密码</label>
-			<input type="password" id="brain-pw" data-i18n-placeholder="pwPlaceholder" autocomplete="new-password" onkeypress="if(event.keyCode==13)generateBrainWallet()">
+			<input type="password" id="brain-pw" data-i18n-placeholder="pwPlaceholder" autocomplete="new-password" onkeypress="if(event.keyCode==13)generateBrainWallet()" oninput="updateBrainEntropy()">
 		</div>
 		<div class="form-row" id="brain-confirm-label">
 			<label data-i18n="confirmPassword">确认密码</label>
@@ -86,6 +87,7 @@
 	</div>
 
 	<div class="output-area" id="brain-output">
+		<div class="crypto-status" id="brain-low-entropy-warn" style="display:none;"></div>
 		<div class="section">
 			<h2 data-i18n="mnemonicOutput">助记词路径</h2>
 			<div class="output-row" data-field="mnemonic">

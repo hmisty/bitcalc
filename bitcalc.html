@@ -101,6 +101,7 @@ body {
 }
 .crypto-status { font-size: 12px; border-radius: 4px; padding: 8px 12px; margin: 0 0 12px; line-height: 1.5; }
 .crypto-ok { background: #e8f5e9; color: #1e7e34; border: 1px solid #b7dfb9; }
+.crypto-mid { background: #fff8e1; color: #b26a00; border: 1px solid #ffd54f; }
 .crypto-warn { background: #fdecea; color: #c62828; border: 1px solid #f5c6cb; font-weight: 600; }
 .textarea-input {
 	width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;
@@ -172,9 +173,10 @@ select { outline: none; }
 	<div class="section">
 		<h2 data-i18n="brainTitle">脑钱包 - 从密码生成地址</h2>
 
+		<div class="crypto-status" id="brain-entropy-bar" style="display:none;"></div>
 		<div class="form-row">
 			<label data-i18n="enterPassword">输入密码</label>
-			<input type="password" id="brain-pw" data-i18n-placeholder="pwPlaceholder" autocomplete="new-password" onkeypress="if(event.keyCode==13)generateBrainWallet()">
+			<input type="password" id="brain-pw" data-i18n-placeholder="pwPlaceholder" autocomplete="new-password" onkeypress="if(event.keyCode==13)generateBrainWallet()" oninput="updateBrainEntropy()">
 		</div>
 		<div class="form-row" id="brain-confirm-label">
 			<label data-i18n="confirmPassword">确认密码</label>
@@ -221,6 +223,7 @@ select { outline: none; }
 	</div>
 
 	<div class="output-area" id="brain-output">
+		<div class="crypto-status" id="brain-low-entropy-warn" style="display:none;"></div>
 		<div class="section">
 			<h2 data-i18n="mnemonicOutput">助记词路径</h2>
 			<div class="output-row" data-field="mnemonic">
@@ -6846,6 +6849,11 @@ var L = {
 		dangerCb: "危险（我确信我知道我在干什么）",
 		pwErrLen: "密码长度需至少30个字符", pwErrUpper: "密码需包含大写字母", pwErrLower: "密码需包含小写字母",
 		pwErrDigit: "密码需包含数字", pwErrSpecial: "密码需包含特殊字符", iterations: "迭代次数",
+		entropyWeak: "🔴 密码长度 {len} 字符，熵估算约 {bits} 位（弱）— 此类密码生成的私钥易被暴力破解，建议至少 128 位",
+		entropyMid: "🟡 密码长度 {len} 字符，熵估算约 {bits} 位（一般）— 建议至少 128 位",
+		entropyStrong: "🟢 密码长度 {len} 字符，熵估算约 {bits} 位（强）",
+		lowEntropyAddrWarn: "⚠ 警告：以下地址由低熵密码（约 {bits} 位）生成，私钥易被暴力破解，请勿存入资金！",
+		lowEntropyAddrWarnMid: "⚠ 注意：以下地址由中等强度密码（约 {bits} 位）生成，建议改用更高熵密码",
 		generate: "生成", showPw: "显示?", wordCount: "单词数",
 		randomTitle: "随机钱包 - 安全随机生成地址",
 		cryptoOk: "✔ 安全：浏览器安全密码随机源 (window.crypto.getRandomValues) 可用",
@@ -6904,6 +6912,11 @@ var L = {
 		pwErrLen: "Password must be at least 30 characters", pwErrUpper: "Password must contain uppercase letters",
 		pwErrLower: "Password must contain lowercase letters", pwErrDigit: "Password must contain digits",
 		pwErrSpecial: "Password must contain special characters", iterations: "Iterations",
+		entropyWeak: "🔴 Password length: {len} chars, estimated entropy: ~{bits} bits (weak) — private keys from such passwords are easy to brute-force; aim for at least 128 bits",
+		entropyMid: "🟡 Password length: {len} chars, estimated entropy: ~{bits} bits (fair) — aim for at least 128 bits",
+		entropyStrong: "🟢 Password length: {len} chars, estimated entropy: ~{bits} bits (strong)",
+		lowEntropyAddrWarn: "⚠ Warning: the following addresses were generated from a low-entropy password (~{bits} bits). The private keys are easy to brute-force; do not store funds on them!",
+		lowEntropyAddrWarnMid: "⚠ Caution: the following addresses were generated from a fair-strength password (~{bits} bits). Consider using a higher-entropy password",
 		generate: "Generate", showPw: "Show?", wordCount: "Words",
 		randomTitle: "Random Wallet - Secure Random Address",
 		cryptoOk: "✔ Secure: browser cryptographic RNG (window.crypto.getRandomValues) available",
@@ -6984,6 +6997,10 @@ function setLang(lang) {
 		var et = document.getElementById('entropy-text');
 		if (et) et.textContent = t('entropyMixed') + ' ' + entropyMixedBytes + ' B';
 	}
+	// Refresh brain-wallet password entropy bar in the new language
+	if (typeof updateBrainEntropy === 'function') updateBrainEntropy();
+	// Refresh the low-entropy address warning (dynamic content) as well
+	if (typeof updateLowEntropyAddrWarn === 'function') updateLowEntropyAddrWarn();
 }
 
 function showTab(name) {
@@ -7058,6 +7075,86 @@ function checkPasswordComplexity(pw) {
 	return null;
 }
 
+// Estimate password entropy in bits (charset size × length, then penalties
+// for repeated runs, ascending/descending sequences, keyboard-row sequences
+// and known-weak passwords). Warning only — never blocks generation.
+var BRAIN_WEAK_PASSWORDS = ['password','123456','12345678','qwerty','abc123','111111','letmein','admin','welcome','monkey','dragon','master','iloveyou','sunshine','princess','football','passw0rd','000000','666666','888888'];
+
+function estimatePasswordEntropy(pw) {
+	if (!pw) return 0;
+	var charset = 0;
+	if (/[a-z]/.test(pw)) charset += 26;
+	if (/[A-Z]/.test(pw)) charset += 26;
+	if (/[0-9]/.test(pw)) charset += 10;
+	if (/[^A-Za-z0-9]/.test(pw)) charset += 33;
+	if (charset === 0) charset = 1;
+	var len = pw.length;
+	var bits = len * Math.log2(charset);
+
+	// Penalty: long runs of the same character (aaaa…)
+	var runLen = 1, maxRun = 1;
+	for (var i = 1; i < len; i++) {
+		if (pw[i] === pw[i - 1]) { runLen++; if (runLen > maxRun) maxRun = runLen; }
+		else runLen = 1;
+	}
+	if (maxRun >= 3) bits *= Math.pow(0.7, maxRun - 2);
+
+	// Penalty: long ascending/descending sequences (abc, 321, …)
+	var seqLen = 1, maxSeq = 1;
+	for (var i = 1; i < len; i++) {
+		var d = pw.charCodeAt(i) - pw.charCodeAt(i - 1);
+		if (d === 1 || d === -1) { seqLen++; if (seqLen > maxSeq) maxSeq = seqLen; }
+		else seqLen = 1;
+	}
+	if (maxSeq >= 4) bits *= 4 / maxSeq;
+
+	// Penalty: keyboard-row sequences (qwerty, asdf, …)
+	var rows = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm', '1234567890', '!@#$%^&*()'];
+	var low = pw.toLowerCase();
+	for (var r = 0; r < rows.length; r++) {
+		for (var i = 0; i + 4 <= rows[r].length; i++) {
+			if (low.indexOf(rows[r].substr(i, 4)) !== -1) { bits *= 0.6; break; }
+		}
+	}
+
+	// Penalty: known weak passwords
+	if (BRAIN_WEAK_PASSWORDS.indexOf(low) !== -1) bits = Math.min(bits, 10);
+
+	// Hard cap: passwords shorter than 15 chars are never rated strong,
+	// no matter how varied the charset is — they are simply too short.
+	// Cap below the strong line (128 bits), so they can still rate fair.
+	if (len < 15 && bits >= 128) bits = 127;
+
+	return Math.round(bits);
+}
+
+function updateBrainEntropy() {
+	var bar = document.getElementById('brain-entropy-bar');
+	if (!bar) return;
+	var pw = document.getElementById('brain-pw').value;
+	// Always show the estimate, including the empty password (0 bits):
+	// an empty password can be submitted directly, so it must be flagged.
+	var bits = estimatePasswordEntropy(pw);
+	var len = pw.length;
+	var cls, key;
+	if (bits < 60) { cls = 'crypto-warn'; key = 'entropyWeak'; }
+	else if (bits < 128) { cls = 'crypto-mid'; key = 'entropyMid'; }
+	else { cls = 'crypto-ok'; key = 'entropyStrong'; }
+	bar.className = 'crypto-status ' + cls;
+	bar.textContent = t(key).replace('{len}', len).replace('{bits}', bits);
+	bar.style.display = 'block';
+}
+
+// Re-render the low-entropy address warning in the current language.
+// Only touches it while it is visible (set by showBrainResults).
+function updateLowEntropyAddrWarn() {
+	var warnEl = document.getElementById('brain-low-entropy-warn');
+	if (!warnEl || warnEl.style.display !== 'block') return;
+	var pwBits = estimatePasswordEntropy(document.getElementById('brain-pw').value || '');
+	warnEl.className = 'crypto-status ' + (pwBits < 60 ? 'crypto-warn' : 'crypto-mid');
+	warnEl.textContent = t(pwBits < 60 ? 'lowEntropyAddrWarn' : 'lowEntropyAddrWarnMid').replace('{bits}', pwBits);
+}
+
 function generateBrainWallet() {
 	showLoading();
 	setTimeout(function() {
@@ -7080,6 +7177,19 @@ function generateBrainWallet() {
 }
 
 function showBrainResults(entropy) {
+	// Warn on addresses derived from low-entropy passwords (generation is
+	// allowed, but the user must see the risk). Empty password ⇒ 0 bits.
+	var pwBits = estimatePasswordEntropy(document.getElementById('brain-pw').value || '');
+	var warnEl = document.getElementById('brain-low-entropy-warn');
+	if (warnEl) {
+		if (pwBits < 128) {
+			warnEl.className = 'crypto-status ' + (pwBits < 60 ? 'crypto-warn' : 'crypto-mid');
+			warnEl.textContent = t(pwBits < 60 ? 'lowEntropyAddrWarn' : 'lowEntropyAddrWarnMid').replace('{bits}', pwBits);
+			warnEl.style.display = 'block';
+		} else {
+			warnEl.style.display = 'none';
+		}
+	}
 	var legacy = entropyToLegacy(entropy);
 	var p2wpkh = getP2WPKH(legacy.ecKeyComp);
 	document.getElementById('brain-output').style.display = 'block';
