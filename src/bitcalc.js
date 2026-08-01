@@ -279,10 +279,11 @@ function estimatePasswordEntropy(pw) {
 	// Penalty: known weak passwords
 	if (BRAIN_WEAK_PASSWORDS.indexOf(low) !== -1) bits = Math.min(bits, 10);
 
-	// Hard cap: passwords shorter than 15 chars are never rated strong,
-	// no matter how varied the charset is — they are simply too short.
+	// Hard cap: passwords shorter than 30 chars (matching the placeholder
+	// hint / complexity requirement) are never rated strong, no matter how
+	// varied the charset is — they are simply too short.
 	// Cap below the strong line (128 bits), so they can still rate fair.
-	if (len < 15 && bits >= 128) bits = 127;
+	if (len < 30 && bits >= 128) bits = 127;
 
 	return Math.round(bits);
 }

@@ -62,7 +62,7 @@ Without a mnemonic, you cannot participate in BIP-361's Phase C recovery mechani
 - **High-resolution timing entropy**: passive `seedRandom`/`seedKeyPress` mix `performance.now()` — one absolute microsecond timestamp plus the inter-event delta since the previous call (real scheduling jitter; the naive two-samples-XOR approach was dead code, both samples being quantized to the same value)
 - **Entropy mixing indicator**: pulsing dot + live byte counter next to the generate button, showing how much mouse/keyboard/timing entropy has been passively mixed into the pool (throttled DOM updates, survives language switch)
 - **Brain-wallet password entropy meter**: live entropy estimate shown above the password field (charset × length minus pattern penalties: repeated runs, ascending/descending sequences, keyboard-row sequences, weak-passwords blacklist). Shows password length + entropy bits, grades <60 bits weak / 60-127 fair / ≥128 strong; empty password is flagged immediately
-- **Low-entropy address warnings**: after generation, a red/orange banner on the output warns when the addresses were derived from a <128-bit password (warning only — generation is never blocked). Passwords shorter than 15 chars can never rate strong
+- **Low-entropy address warnings**: after generation, a red/orange banner on the output warns when the addresses were derived from a <128-bit password (warning only — generation is never blocked). Passwords shorter than 30 chars (matching the complexity hint) can never rate strong
 - **Disclaimer**: Footer disclaimer changed to black text and marked "Preview version"
 
 ### 2026-06-24
