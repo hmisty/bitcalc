@@ -3,13 +3,76 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f0f2f5">
+	<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#12141d">
 	<title data-i18n="title">BitCalc Bitcoin Address Calculator</title>
 	<style type="text/css">
 * { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+	color-scheme: light;
+	--bg: #f0f2f5;
+	--card: #ffffff;
+	--card-subtle: #f8f9fa;
+	--input-bg: #ffffff;
+	--text: #1a1a2e;
+	--text-label: #555555;
+	--text-muted: #888888;
+	--text-faint: #999999;
+	--border: #dddddd;
+	--border-light: #e8e8e8;
+	--accent: #f7931a;
+	--accent-hover: #e88211;
+	--accent-dim: rgba(247,147,26,0.15);
+	--btn-sec-bg: #e0e0e0;
+	--btn-sec-text: #333333;
+	--btn-disabled-bg: #cccccc;
+	--ok: #28a745;
+	--bad: #dc3545;
+	--crypto-ok-bg: #e8f5e9; --crypto-ok-text: #1e7e34; --crypto-ok-border: #b7dfb9;
+	--crypto-mid-bg: #fff8e1; --crypto-mid-text: #b26a00; --crypto-mid-border: #ffd54f;
+	--crypto-warn-bg: #fdecea; --crypto-warn-text: #c62828; --crypto-warn-border: #f5c6cb;
+	--overlay: rgba(255,255,255,0.85);
+	--shadow: 0 1px 3px rgba(0,0,0,0.08);
+	--qr-fg: #000000;
+	--qr-bg: #ffffff;
+}
+/* Follow system light/dark mode. Dark palette keeps the same brand
+   accent (#f7931a) and harmonizes with the dark navy header. */
+@media (prefers-color-scheme: dark) {
+	:root {
+		color-scheme: dark;
+		--bg: #12141d;
+		--card: #1b1f2b;
+		--card-subtle: #222736;
+		--input-bg: #151924;
+		--text: #e8eaf2;
+		--text-label: #a9b1c3;
+		--text-muted: #8b93a7;
+		--text-faint: #6e7688;
+		--border: #343b4d;
+		--border-light: #262c3a;
+		--accent: #f7931a;
+		--accent-hover: #ffa23d;
+		--accent-dim: rgba(247,147,26,0.18);
+		--btn-sec-bg: #2e3444;
+		--btn-sec-text: #d6dae6;
+		--btn-disabled-bg: #3a4050;
+		--ok: #4fd17a;
+		--bad: #f0707f;
+		--crypto-ok-bg: #10271a; --crypto-ok-text: #6fd393; --crypto-ok-border: #24513a;
+		--crypto-mid-bg: #2a2112; --crypto-mid-text: #e0a94a; --crypto-mid-border: #55411c;
+		--crypto-warn-bg: #2b1518; --crypto-warn-text: #f08c94; --crypto-warn-border: #55272c;
+		--overlay: rgba(18,20,29,0.85);
+		--shadow: 0 1px 3px rgba(0,0,0,0.4);
+		--qr-fg: #e8eaf2;
+		--qr-bg: #1b1f2b;
+	}
+}
 body {
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-	background: #f0f2f5; color: #1a1a2e; line-height: 1.5;
+	background: var(--bg); color: var(--text); line-height: 1.5;
 }
+/* Header is dark in both themes; colors stay fixed. */
 .header {
 	background: #1a1a2e; color: #fff; padding: 16px 24px;
 	display: flex; align-items: center; justify-content: space-between;
@@ -31,52 +94,54 @@ body {
 .lang-switch button.active { color: #fff; border-color: #f7931a; background: rgba(247,147,26,0.15); }
 .lang-switch a:hover svg { fill: #fff; }
 .tabs {
-	display: flex; background: #fff; border-bottom: 2px solid #e0e0e0;
+	display: flex; background: var(--card); border-bottom: 2px solid var(--border);
 	padding: 0 24px; position: sticky; top: 0; z-index: 10;
 }
 .tab {
-	padding: 12px 20px; cursor: pointer; color: #666; font-size: 14px;
+	padding: 12px 20px; cursor: pointer; color: var(--text-muted); font-size: 14px;
 	border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s;
 	user-select: none;
 }
-.tab:hover { color: #1a1a2e; }
-.tab.active { color: #f7931a; border-bottom-color: #f7931a; font-weight: 600; }
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
 .tab-content { display: none; padding: 24px; max-width: 960px; margin: 0 auto; }
 .tab-content.active { display: block; }
 .section {
-	background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 16px;
-	box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+	background: var(--card); border-radius: 8px; padding: 20px; margin-bottom: 16px;
+	box-shadow: var(--shadow);
 }
-.section h2 { font-size: 16px; margin-bottom: 12px; color: #1a1a2e; }
+.section h2 { font-size: 16px; margin-bottom: 12px; color: var(--text); }
 .form-row { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; align-items: center; }
-.form-row label { font-size: 13px; color: #555; min-width: 80px; }
+.form-row label { font-size: 13px; color: var(--text-label); min-width: 80px; }
 .form-row input[type="password"], .form-row input[type="text"], .form-row input[type="number"] {
-	padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;
+	padding: 8px 12px; border: 1px solid var(--border); border-radius: 4px; font-size: 14px;
 	flex: 1; min-width: 200px; outline: none; transition: border-color 0.2s;
+	background: var(--input-bg); color: var(--text);
 }
 .form-row input[type="password"]:focus, .form-row input[type="text"]:focus, .form-row input[type="number"]:focus {
-	border-color: #f7931a;
+	border-color: var(--accent);
 }
 .form-row input[type="number"] { min-width: 80px; flex: 0 0 80px; }
+::placeholder { color: var(--text-faint); opacity: 1; }
 .btn {
-	background: #f7931a; color: #fff; border: none; padding: 10px 24px;
+	background: var(--accent); color: #fff; border: none; padding: 10px 24px;
 	border-radius: 4px; font-size: 14px; cursor: pointer; font-weight: 600;
 	transition: background 0.2s;
 }
-.btn:hover { background: #e88211; }
-.btn:disabled { background: #ccc; cursor: not-allowed; }
+.btn:hover { background: var(--accent-hover); }
+.btn:disabled { background: var(--btn-disabled-bg); cursor: not-allowed; }
 .btn-sm { padding: 6px 14px; font-size: 12px; }
-.btn-sec { background: #e0e0e0; color: #333; }
-.btn-sec:hover { background: #ccc; }
-.output-area { margin-top: 16px; padding: 16px; background: #f8f9fa; border-radius: 6px; display: none; }
+.btn-sec { background: var(--btn-sec-bg); color: var(--btn-sec-text); }
+.btn-sec:hover { background: var(--border); }
+.output-area { margin-top: 16px; padding: 16px; background: var(--card-subtle); border-radius: 6px; display: none; }
 .output-area.show { display: block; }
 .output-row { margin-bottom: 10px; }
 .output-row:last-child { margin-bottom: 0; }
-.output-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+.output-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
 .output-value {
 	font-family: "SF Mono", "Monaco", "Inconsolata", "Fira Code", "Droid Sans Mono", monospace;
-	font-size: 13px; word-break: break-all; background: #fff; padding: 6px 10px;
-	border-radius: 4px; border: 1px solid #e0e0e0;
+	font-size: 13px; word-break: break-all; background: var(--input-bg); padding: 6px 10px;
+	border-radius: 4px; border: 1px solid var(--border); color: var(--text);
 }
 .output-value.hash { font-size: 11px; }
 .sensitive { filter: blur(6px); cursor: pointer; user-select: none; transition: filter 0.2s ease; }
@@ -85,24 +150,24 @@ body {
 .qr-row { display: flex; gap: 16px; flex-wrap: wrap; margin: 12px 0; }
 .qr-item { text-align: center; }
 .qr-item canvas { display: block; margin: 0 auto 4px; }
-.qr-label { font-size: 11px; color: #888; }
+.qr-label { font-size: 11px; color: var(--text-muted); }
 .select-group { display: flex; gap: 8px; align-items: center; }
 .select-group select {
-	padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;
-	outline: none; background: #fff;
+	padding: 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 14px;
+	outline: none; background: var(--input-bg); color: var(--text);
 }
-.select-group select:focus { border-color: #f7931a; }
+.select-group select:focus { border-color: var(--accent); }
 .check-row { display: flex; gap: 16px; align-items: center; }
 .check-row label { font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
 .check-row input[type="checkbox"] { cursor: pointer; }
-.status-ok { color: #28a745; font-weight: 600; }
-.status-bad { color: #dc3545; font-weight: 600; }
+.status-ok { color: var(--ok); font-weight: 600; }
+.status-bad { color: var(--bad); font-weight: 600; }
 .entropy-indicator {
 	display: flex; align-items: center; gap: 6px; min-width: 120px;
-	font-size: 12px; color: #888; white-space: nowrap;
+	font-size: 12px; color: var(--text-muted); white-space: nowrap;
 }
 .entropy-dot {
-	width: 8px; height: 8px; border-radius: 50%; background: #f7931a;
+	width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
 	animation: entropy-pulse 1.6s ease-in-out infinite;
 }
 @keyframes entropy-pulse {
@@ -110,46 +175,47 @@ body {
 	50% { opacity: 1; transform: scale(1.15); }
 }
 .crypto-status { font-size: 12px; border-radius: 4px; padding: 8px 12px; margin: 0 0 12px; line-height: 1.5; }
-.crypto-ok { background: #e8f5e9; color: #1e7e34; border: 1px solid #b7dfb9; }
-.crypto-mid { background: #fff8e1; color: #b26a00; border: 1px solid #ffd54f; }
-.crypto-warn { background: #fdecea; color: #c62828; border: 1px solid #f5c6cb; font-weight: 600; }
+.crypto-ok { background: var(--crypto-ok-bg); color: var(--crypto-ok-text); border: 1px solid var(--crypto-ok-border); }
+.crypto-mid { background: var(--crypto-mid-bg); color: var(--crypto-mid-text); border: 1px solid var(--crypto-mid-border); }
+.crypto-warn { background: var(--crypto-warn-bg); color: var(--crypto-warn-text); border: 1px solid var(--crypto-warn-border); font-weight: 600; }
 .textarea-input {
-	width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;
+	width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;
 	font-family: "SF Mono", "Monaco", "Inconsolata", "Fira Code", monospace;
 	font-size: 13px; outline: none; resize: vertical;
+	background: var(--input-bg); color: var(--text);
 }
-.textarea-input:focus { border-color: #f7931a; }
+.textarea-input:focus { border-color: var(--accent); }
 .test-results { margin-top: 12px; font-size: 12px; }
 .test-results .test-item { padding: 3px 0; }
-.test-results .test-item.ok { color: #28a745; }
-.test-results .test-item.fail { color: #dc3545; }
+.test-results .test-item.ok { color: var(--ok); }
+.test-results .test-item.fail { color: var(--bad); }
 select { outline: none; }
 .adv-toggle {
-	font-size: 13px; color: #f7931a; cursor: pointer; user-select: none;
+	font-size: 13px; color: var(--accent); cursor: pointer; user-select: none;
 	display: flex; align-items: center; gap: 6px;
 }
-.adv-toggle:hover { color: #e88211; }
+.adv-toggle:hover { color: var(--accent-hover); }
 .adv-arrow { font-size: 10px; }
 .adv-content { padding-left: 4px; }
-.danger-cb { font-size: 11px; color: #dc3545; cursor: pointer; min-width: auto; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+.danger-cb { font-size: 11px; color: var(--bad); cursor: pointer; min-width: auto; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
 .danger-cb input { cursor: pointer; }
 #seedpool { display: none; }
 
 .loading-overlay {
 	position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-	background: rgba(255,255,255,0.85); z-index: 9999;
+	background: var(--overlay); z-index: 9999;
 	display: flex; align-items: center; justify-content: center;
 	flex-direction: column; gap: 16px;
 	opacity: 0; pointer-events: none; transition: opacity 0.15s;
 }
 .loading-overlay.active { opacity: 1; pointer-events: auto; }
 .loading-spinner {
-	width: 36px; height: 36px; border: 3px solid #e0e0e0;
-	border-top-color: #f7931a; border-radius: 50%;
+	width: 36px; height: 36px; border: 3px solid var(--border);
+	border-top-color: var(--accent); border-radius: 50%;
 	animation: spin 0.7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-.loading-text { font-size: 14px; color: #555; }
+.loading-text { font-size: 14px; color: var(--text-label); }
 
 /* Mobile narrow screens: single-column layout driven by the viewport
    meta — not just enlarged fonts. Rows stack vertically, tabs split the
@@ -249,7 +315,7 @@ select { outline: none; }
 			</span>
 		</div>
 
-		<div style="margin-top:12px;border-top:1px solid #eee;padding-top:12px;">
+		<div style="margin-top:12px;border-top:1px solid var(--border-light);padding-top:12px;">
 			<div class="adv-toggle" onclick="toggleAdv(this)">
 				<span data-i18n="advOptions">高级选项</span>
 				<span class="adv-arrow">&#9654;</span>
@@ -261,7 +327,7 @@ select { outline: none; }
 					<label class="danger-cb"><input type="checkbox" onchange="toggleDanger(this,'brain-iters')"> <span data-i18n="dangerCb">危险（我确信我知道我在干什么）</span></label>
 				</div>
 				<div class="form-row">
-					<span style="font-size:11px;color:#888;" data-i18n="iterDesc">迭代次数=1时使用SHA256(密码); >1时使用迭代SHA256</span>
+					<span style="font-size:11px;color:var(--text-muted);" data-i18n="iterDesc">迭代次数=1时使用SHA256(密码); >1时使用迭代SHA256</span>
 				</div>
 				<div class="form-row">
 					<label data-i18n="wordCount">单词数</label>
@@ -301,7 +367,7 @@ select { outline: none; }
 
 		<div class="section">
 			<h2 data-i18n="legacyTitle">经典路径</h2>
-			<div style="margin:12px 0;padding:12px;background:#f8f9fa;border-radius:6px;">
+			<div style="margin:12px 0;padding:12px;background:var(--card-subtle);border-radius:6px;">
 				<div class="qr-row">
 					<div class="qr-item"><div id="brain-qr-p2wpkh"></div><div class="qr-label" data-i18n="p2wpkhLabel">SegWit</div></div>
 					<div class="qr-item"><div id="brain-qr-p2pkh-comp"></div><div class="qr-label" data-i18n="p2pkhComp">P2PKH (压缩)</div></div>
@@ -321,8 +387,8 @@ select { outline: none; }
 				</div>
 			</div>
 
-			<div style="margin:12px 0;border:1px solid #e8e8e8;border-radius:6px;overflow:hidden;">
-				<div class="adv-toggle" onclick="toggleAdv(this)" style="padding:10px 14px;background:#f8f9fa;justify-content:space-between;">
+			<div style="margin:12px 0;border:1px solid var(--border-light);border-radius:6px;overflow:hidden;">
+				<div class="adv-toggle" onclick="toggleAdv(this)" style="padding:10px 14px;background:var(--card-subtle);justify-content:space-between;">
 					<span data-i18n="uncompTitle">非压缩格式 (向下兼容)</span>
 					<span class="adv-arrow">&#9654;</span>
 				</div>
@@ -344,7 +410,7 @@ select { outline: none; }
 		</div>
 
 		<div class="section" style="padding:8px 16px;">
-			<div class="adv-toggle" onclick="toggleAdv(this)" style="font-size:12px;color:#999;">
+			<div class="adv-toggle" onclick="toggleAdv(this)" style="font-size:12px;color:var(--text-faint);">
 				<span class="adv-arrow">&#9654;</span>
 				<span data-i18n="techDetails">技术详情 (Hex)</span>
 			</div>
@@ -374,7 +440,7 @@ select { outline: none; }
 			</div>
 			<button class="btn" id="random-generate" onclick="generateRandom()" data-i18n="generate">生成</button>
 		</div>
-		<div style="margin-top:12px;border-top:1px solid #eee;padding-top:12px;">
+		<div style="margin-top:12px;border-top:1px solid var(--border-light);padding-top:12px;">
 			<div class="adv-toggle" onclick="toggleAdv(this)">
 				<span data-i18n="advOptions">高级选项</span>
 				<span class="adv-arrow">&#9654;</span>
@@ -413,7 +479,7 @@ select { outline: none; }
 
 		<div class="section">
 			<h2 data-i18n="legacyTitle">经典路径</h2>
-			<div style="margin:12px 0;padding:12px;background:#f8f9fa;border-radius:6px;">
+			<div style="margin:12px 0;padding:12px;background:var(--card-subtle);border-radius:6px;">
 				<div class="qr-row">
 					<div class="qr-item"><div id="random-qr-p2wpkh"></div><div class="qr-label" data-i18n="p2wpkhLabel">SegWit</div></div>
 					<div class="qr-item"><div id="random-qr-p2pkh-comp"></div><div class="qr-label" data-i18n="p2pkhComp">P2PKH (压缩)</div></div>
@@ -433,8 +499,8 @@ select { outline: none; }
 				</div>
 			</div>
 
-			<div style="margin:12px 0;border:1px solid #e8e8e8;border-radius:6px;overflow:hidden;">
-				<div class="adv-toggle" onclick="toggleAdv(this)" style="padding:10px 14px;background:#f8f9fa;justify-content:space-between;">
+			<div style="margin:12px 0;border:1px solid var(--border-light);border-radius:6px;overflow:hidden;">
+				<div class="adv-toggle" onclick="toggleAdv(this)" style="padding:10px 14px;background:var(--card-subtle);justify-content:space-between;">
 					<span data-i18n="uncompTitle">非压缩格式 (向下兼容)</span>
 					<span class="adv-arrow">&#9654;</span>
 				</div>
@@ -456,7 +522,7 @@ select { outline: none; }
 		</div>
 
 		<div class="section" style="padding:8px 16px;">
-			<div class="adv-toggle" onclick="toggleAdv(this)" style="font-size:12px;color:#999;">
+			<div class="adv-toggle" onclick="toggleAdv(this)" style="font-size:12px;color:var(--text-faint);">
 				<span class="adv-arrow">&#9654;</span>
 				<span data-i18n="techDetails">技术详情 (Hex)</span>
 			</div>
@@ -541,7 +607,7 @@ select { outline: none; }
 		</div>
 
 		<div class="section" style="padding:8px 16px;">
-			<div class="adv-toggle" onclick="toggleAdv(this)" style="font-size:12px;color:#999;">
+			<div class="adv-toggle" onclick="toggleAdv(this)" style="font-size:12px;color:var(--text-faint);">
 				<span class="adv-arrow">&#9654;</span>
 				<span data-i18n="techDetails">技术详情 (Hex)</span>
 			</div>
@@ -565,7 +631,7 @@ select { outline: none; }
 		<div class="form-row">
 			<textarea class="textarea-input" id="verify-input" rows="3" data-i18n-placeholder="verifyPlaceholder"></textarea>
 		</div>
-		<div style="font-size:11px;color:#888;margin-bottom:12px;" data-i18n="supportedFormats">支持格式: 助记词(12/24词)、私钥WIF、P2PKH地址、SegWit地址</div>
+		<div style="font-size:11px;color:var(--text-muted);margin-bottom:12px;" data-i18n="supportedFormats">支持格式: 助记词(12/24词)、私钥WIF、P2PKH地址、SegWit地址</div>
 		<div class="form-row">
 			<label></label>
 			<button class="btn" onclick="doVerify()" data-i18n="verifyBtn">验证</button>
@@ -583,21 +649,21 @@ select { outline: none; }
 <div id="content-test" class="tab-content">
 	<div class="section">
 		<h2 data-i18n="selfTest">自检</h2>
-		<p style="font-size:13px;color:#888;margin-bottom:12px;" data-i18n="selfTestDesc">使用已知测试向量验证核心功能</p>
+		<p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;" data-i18n="selfTestDesc">使用已知测试向量验证核心功能</p>
 		<button class="btn btn-sm" onclick="runSelfTest()" data-i18n="runTest">运行测试</button>
 		<div class="test-results" id="test-results" style="margin-top:12px;"></div>
 	</div>
 </div>
 
 <div style="max-width:960px;margin:0 auto;padding:0 24px 24px;text-align:center;">
-	<div style="font-size:12px;color:#666;margin-bottom:6px;">
+	<div style="font-size:12px;color:var(--text-label);margin-bottom:6px;">
 		<span data-i18n="usageTip">💡 使用建议：下载本页面后离线使用，以浏览器无痕模式打开</span>
 	</div>
-	<div style="font-size:10px;color:#000;margin-top:2px;" data-i18n="disclaimer">预览版。无担保，使用风险自负。No warranty, use at your own risk.</div>
-	<div style="font-size:10px;color:#888;margin-top:4px;" data-i18n="version">当前版本：2026.08.02</div>
-	<div style="border-top:1px solid #e0e0e0;margin-top:14px;padding-top:12px;font-size:12px;color:#999;">
+	<div style="font-size:10px;color:var(--text-muted);margin-top:2px;" data-i18n="disclaimer">预览版。无担保，使用风险自负。No warranty, use at your own risk.</div>
+	<div style="font-size:10px;color:var(--text-muted);margin-top:4px;" data-i18n="version">当前版本：2026.08.03</div>
+	<div style="border-top:1px solid var(--border);margin-top:14px;padding-top:12px;font-size:12px;color:var(--text-faint);">
 		<span data-i18n="donate">☕ 捐赠支持</span>:
-		<span style="font-family:monospace;color:#f7931a;">bc1qq5eqsmqmlkrjnd6y7hwhyuv73vrkrp2pg8ma2s</span>
+		<span style="font-family:monospace;color:var(--accent);">bc1qq5eqsmqmlkrjnd6y7hwhyuv73vrkrp2pg8ma2s</span>
 	</div>
 </div>
 
@@ -6966,7 +7032,7 @@ var L = {
 		donate: "☕ 捐赠支持",
 		usageTip: "💡 使用建议：下载本页面后离线使用，以浏览器无痕模式打开",
 		disclaimer: "预览版。无担保，使用风险自负。No warranty, use at your own risk.",
-		version: "当前版本：2026.08.02",
+		version: "当前版本：2026.08.03",
 	},
 	en: {
 		title: "Bitcoin Address Calculator",
@@ -7031,7 +7097,7 @@ var L = {
 		donate: "☕ Support this project",
 		usageTip: "💡 Tip: download this page and use it offline in a private/incognito window",
 		disclaimer: "Preview version. No warranty, use at your own risk.",
-		version: "Version: 2026.08.02",
+		version: "Version: 2026.08.03",
 	}
 };
 var LANG = 'zh';
@@ -7106,9 +7172,13 @@ function showQrCode(containerId, text) {
 		ctx.scale(4, 4);
 		var tileW = size / qr.getModuleCount();
 		var tileH = size / qr.getModuleCount();
+		/* Follow light/dark theme via CSS variables (see bitcalc.css) */
+		var cs = getComputedStyle(document.documentElement);
+		var qrFg = (cs.getPropertyValue('--qr-fg') || '#000').trim();
+		var qrBg = (cs.getPropertyValue('--qr-bg') || '#fff').trim();
 		for (var row = 0; row < qr.getModuleCount(); row++) {
 			for (var col = 0; col < qr.getModuleCount(); col++) {
-				ctx.fillStyle = qr.isDark(row, col) ? '#000' : '#fff';
+				ctx.fillStyle = qr.isDark(row, col) ? qrFg : qrBg;
 				ctx.fillRect(col * tileW, row * tileH, tileW, tileH);
 			}
 		}

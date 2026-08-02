@@ -3,6 +3,8 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f0f2f5">
+	<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#12141d">
 	<title data-i18n="title">BitCalc Bitcoin Address Calculator</title>
 	<style type="text/css">
 //main.css
@@ -57,7 +59,7 @@
 			</span>
 		</div>
 
-		<div style="margin-top:12px;border-top:1px solid #eee;padding-top:12px;">
+		<div style="margin-top:12px;border-top:1px solid var(--border-light);padding-top:12px;">
 			<div class="adv-toggle" onclick="toggleAdv(this)">
 				<span data-i18n="advOptions">高级选项</span>
 				<span class="adv-arrow">&#9654;</span>
@@ -69,7 +71,7 @@
 					<label class="danger-cb"><input type="checkbox" onchange="toggleDanger(this,'brain-iters')"> <span data-i18n="dangerCb">危险（我确信我知道我在干什么）</span></label>
 				</div>
 				<div class="form-row">
-					<span style="font-size:11px;color:#888;" data-i18n="iterDesc">迭代次数=1时使用SHA256(密码); >1时使用迭代SHA256</span>
+					<span style="font-size:11px;color:var(--text-muted);" data-i18n="iterDesc">迭代次数=1时使用SHA256(密码); >1时使用迭代SHA256</span>
 				</div>
 				<div class="form-row">
 					<label data-i18n="wordCount">单词数</label>
@@ -109,7 +111,7 @@
 
 		<div class="section">
 			<h2 data-i18n="legacyTitle">经典路径</h2>
-			<div style="margin:12px 0;padding:12px;background:#f8f9fa;border-radius:6px;">
+			<div style="margin:12px 0;padding:12px;background:var(--card-subtle);border-radius:6px;">
 				<div class="qr-row">
 					<div class="qr-item"><div id="brain-qr-p2wpkh"></div><div class="qr-label" data-i18n="p2wpkhLabel">SegWit</div></div>
 					<div class="qr-item"><div id="brain-qr-p2pkh-comp"></div><div class="qr-label" data-i18n="p2pkhComp">P2PKH (压缩)</div></div>
@@ -129,8 +131,8 @@
 				</div>
 			</div>
 
-			<div style="margin:12px 0;border:1px solid #e8e8e8;border-radius:6px;overflow:hidden;">
-				<div class="adv-toggle" onclick="toggleAdv(this)" style="padding:10px 14px;background:#f8f9fa;justify-content:space-between;">
+			<div style="margin:12px 0;border:1px solid var(--border-light);border-radius:6px;overflow:hidden;">
+				<div class="adv-toggle" onclick="toggleAdv(this)" style="padding:10px 14px;background:var(--card-subtle);justify-content:space-between;">
 					<span data-i18n="uncompTitle">非压缩格式 (向下兼容)</span>
 					<span class="adv-arrow">&#9654;</span>
 				</div>
@@ -152,7 +154,7 @@
 		</div>
 
 		<div class="section" style="padding:8px 16px;">
-			<div class="adv-toggle" onclick="toggleAdv(this)" style="font-size:12px;color:#999;">
+			<div class="adv-toggle" onclick="toggleAdv(this)" style="font-size:12px;color:var(--text-faint);">
 				<span class="adv-arrow">&#9654;</span>
 				<span data-i18n="techDetails">技术详情 (Hex)</span>
 			</div>
@@ -182,7 +184,7 @@
 			</div>
 			<button class="btn" id="random-generate" onclick="generateRandom()" data-i18n="generate">生成</button>
 		</div>
-		<div style="margin-top:12px;border-top:1px solid #eee;padding-top:12px;">
+		<div style="margin-top:12px;border-top:1px solid var(--border-light);padding-top:12px;">
 			<div class="adv-toggle" onclick="toggleAdv(this)">
 				<span data-i18n="advOptions">高级选项</span>
 				<span class="adv-arrow">&#9654;</span>
@@ -221,7 +223,7 @@
 
 		<div class="section">
 			<h2 data-i18n="legacyTitle">经典路径</h2>
-			<div style="margin:12px 0;padding:12px;background:#f8f9fa;border-radius:6px;">
+			<div style="margin:12px 0;padding:12px;background:var(--card-subtle);border-radius:6px;">
 				<div class="qr-row">
 					<div class="qr-item"><div id="random-qr-p2wpkh"></div><div class="qr-label" data-i18n="p2wpkhLabel">SegWit</div></div>
 					<div class="qr-item"><div id="random-qr-p2pkh-comp"></div><div class="qr-label" data-i18n="p2pkhComp">P2PKH (压缩)</div></div>
@@ -241,8 +243,8 @@
 				</div>
 			</div>
 
-			<div style="margin:12px 0;border:1px solid #e8e8e8;border-radius:6px;overflow:hidden;">
-				<div class="adv-toggle" onclick="toggleAdv(this)" style="padding:10px 14px;background:#f8f9fa;justify-content:space-between;">
+			<div style="margin:12px 0;border:1px solid var(--border-light);border-radius:6px;overflow:hidden;">
+				<div class="adv-toggle" onclick="toggleAdv(this)" style="padding:10px 14px;background:var(--card-subtle);justify-content:space-between;">
 					<span data-i18n="uncompTitle">非压缩格式 (向下兼容)</span>
 					<span class="adv-arrow">&#9654;</span>
 				</div>
@@ -264,7 +266,7 @@
 		</div>
 
 		<div class="section" style="padding:8px 16px;">
-			<div class="adv-toggle" onclick="toggleAdv(this)" style="font-size:12px;color:#999;">
+			<div class="adv-toggle" onclick="toggleAdv(this)" style="font-size:12px;color:var(--text-faint);">
 				<span class="adv-arrow">&#9654;</span>
 				<span data-i18n="techDetails">技术详情 (Hex)</span>
 			</div>
@@ -349,7 +351,7 @@
 		</div>
 
 		<div class="section" style="padding:8px 16px;">
-			<div class="adv-toggle" onclick="toggleAdv(this)" style="font-size:12px;color:#999;">
+			<div class="adv-toggle" onclick="toggleAdv(this)" style="font-size:12px;color:var(--text-faint);">
 				<span class="adv-arrow">&#9654;</span>
 				<span data-i18n="techDetails">技术详情 (Hex)</span>
 			</div>
@@ -373,7 +375,7 @@
 		<div class="form-row">
 			<textarea class="textarea-input" id="verify-input" rows="3" data-i18n-placeholder="verifyPlaceholder"></textarea>
 		</div>
-		<div style="font-size:11px;color:#888;margin-bottom:12px;" data-i18n="supportedFormats">支持格式: 助记词(12/24词)、私钥WIF、P2PKH地址、SegWit地址</div>
+		<div style="font-size:11px;color:var(--text-muted);margin-bottom:12px;" data-i18n="supportedFormats">支持格式: 助记词(12/24词)、私钥WIF、P2PKH地址、SegWit地址</div>
 		<div class="form-row">
 			<label></label>
 			<button class="btn" onclick="doVerify()" data-i18n="verifyBtn">验证</button>
@@ -391,21 +393,21 @@
 <div id="content-test" class="tab-content">
 	<div class="section">
 		<h2 data-i18n="selfTest">自检</h2>
-		<p style="font-size:13px;color:#888;margin-bottom:12px;" data-i18n="selfTestDesc">使用已知测试向量验证核心功能</p>
+		<p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;" data-i18n="selfTestDesc">使用已知测试向量验证核心功能</p>
 		<button class="btn btn-sm" onclick="runSelfTest()" data-i18n="runTest">运行测试</button>
 		<div class="test-results" id="test-results" style="margin-top:12px;"></div>
 	</div>
 </div>
 
 <div style="max-width:960px;margin:0 auto;padding:0 24px 24px;text-align:center;">
-	<div style="font-size:12px;color:#666;margin-bottom:6px;">
+	<div style="font-size:12px;color:var(--text-label);margin-bottom:6px;">
 		<span data-i18n="usageTip">💡 使用建议：下载本页面后离线使用，以浏览器无痕模式打开</span>
 	</div>
-	<div style="font-size:10px;color:#000;margin-top:2px;" data-i18n="disclaimer">预览版。无担保，使用风险自负。No warranty, use at your own risk.</div>
-	<div style="font-size:10px;color:#888;margin-top:4px;" data-i18n="version">当前版本：2026.08.02</div>
-	<div style="border-top:1px solid #e0e0e0;margin-top:14px;padding-top:12px;font-size:12px;color:#999;">
+	<div style="font-size:10px;color:var(--text-muted);margin-top:2px;" data-i18n="disclaimer">预览版。无担保，使用风险自负。No warranty, use at your own risk.</div>
+	<div style="font-size:10px;color:var(--text-muted);margin-top:4px;" data-i18n="version">当前版本：2026.08.03</div>
+	<div style="border-top:1px solid var(--border);margin-top:14px;padding-top:12px;font-size:12px;color:var(--text-faint);">
 		<span data-i18n="donate">☕ 捐赠支持</span>:
-		<span style="font-family:monospace;color:#f7931a;">bc1qq5eqsmqmlkrjnd6y7hwhyuv73vrkrp2pg8ma2s</span>
+		<span style="font-family:monospace;color:var(--accent);">bc1qq5eqsmqmlkrjnd6y7hwhyuv73vrkrp2pg8ma2s</span>
 	</div>
 </div>
 

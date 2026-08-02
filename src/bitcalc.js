@@ -61,7 +61,7 @@ var L = {
 		donate: "☕ 捐赠支持",
 		usageTip: "💡 使用建议：下载本页面后离线使用，以浏览器无痕模式打开",
 		disclaimer: "预览版。无担保，使用风险自负。No warranty, use at your own risk.",
-		version: "当前版本：2026.08.02",
+		version: "当前版本：2026.08.03",
 	},
 	en: {
 		title: "Bitcoin Address Calculator",
@@ -126,7 +126,7 @@ var L = {
 		donate: "☕ Support this project",
 		usageTip: "💡 Tip: download this page and use it offline in a private/incognito window",
 		disclaimer: "Preview version. No warranty, use at your own risk.",
-		version: "Version: 2026.08.02",
+		version: "Version: 2026.08.03",
 	}
 };
 var LANG = 'zh';
@@ -201,9 +201,13 @@ function showQrCode(containerId, text) {
 		ctx.scale(4, 4);
 		var tileW = size / qr.getModuleCount();
 		var tileH = size / qr.getModuleCount();
+		/* Follow light/dark theme via CSS variables (see bitcalc.css) */
+		var cs = getComputedStyle(document.documentElement);
+		var qrFg = (cs.getPropertyValue('--qr-fg') || '#000').trim();
+		var qrBg = (cs.getPropertyValue('--qr-bg') || '#fff').trim();
 		for (var row = 0; row < qr.getModuleCount(); row++) {
 			for (var col = 0; col < qr.getModuleCount(); col++) {
-				ctx.fillStyle = qr.isDark(row, col) ? '#000' : '#fff';
+				ctx.fillStyle = qr.isDark(row, col) ? qrFg : qrBg;
 				ctx.fillRect(col * tileW, row * tileH, tileW, tileH);
 			}
 		}

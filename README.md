@@ -48,10 +48,18 @@ Without a mnemonic, you cannot participate in BIP-361's Phase C recovery mechani
 | **QR Code** | QR codes for addresses and private keys |
 | **Sensitive Mask** | Mnemonics, WIF private keys and entropy/seed hex are blur-masked until clicked (shoulder-surfing protection) |
 | **Mobile Friendly** | Viewport-driven single-column layout with enlarged touch targets |
+| **Dark Mode** | Follows the system light/dark theme automatically (`prefers-color-scheme`, zero JS) |
 | **Bilingual** | Chinese / English UI toggle |
 | **Fully Offline** | Single HTML file, open in any browser |
 
 ## Changelog
+
+### 2026-08-03 — Dark Mode (Follows System Theme)
+
+- **System light/dark mode**: Every color is now a CSS custom property; a `@media (prefers-color-scheme: dark)` block switches the entire page automatically when the OS/browser is in dark mode — no toggle, no JavaScript, no reload
+- **Dark palette**: Dark navy surfaces (`#12141d` page / `#1b1f2b` cards) harmonizing with the always-dark header; the Bitcoin-orange accent is preserved; status banners, crypto indicators, form controls and the loading overlay all get dark variants
+- **Theme-aware QR codes**: QR canvases read `--qr-fg`/`--qr-bg` CSS variables at draw time — light modules on a dark background in dark mode
+- **Inline style cleanup**: ~20 inline color styles in the template converted to variables; `color-scheme` is set per theme so native scrollbars/form controls follow; `theme-color` metas added for mobile browser chrome
 
 ### 2026-08-02 — UI Polish & Mobile Support
 
