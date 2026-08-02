@@ -7,8 +7,15 @@ body {
 	background: #1a1a2e; color: #fff; padding: 16px 24px;
 	display: flex; align-items: center; justify-content: space-between;
 }
+.header-brand { display: flex; flex-direction: row; align-items: baseline; min-width: 0; }
 .header h1 { font-size: 20px; font-weight: 600; letter-spacing: 0.5px; }
+.header-subtitle { font-size: 12px; color: #888; font-weight: 300; margin-left: 8px; }
 .header h1 span { color: #f7931a; }
+.header h1 span.bc-badge {
+	background: #f7931a; color: #fff; font-size: 11px; font-weight: 700;
+	border-radius: 4px; padding: 2px 7px; vertical-align: middle;
+	letter-spacing: 0.5px;
+}
 .lang-switch { display: flex; gap: 4px; }
 .lang-switch button {
 	background: transparent; color: #888; border: 1px solid #444;
@@ -65,6 +72,8 @@ body {
 	border-radius: 4px; border: 1px solid #e0e0e0;
 }
 .output-value.hash { font-size: 11px; }
+.sensitive { filter: blur(6px); cursor: pointer; user-select: none; transition: filter 0.2s ease; }
+.sensitive.show { filter: none; user-select: auto; }
 .mnemonic-words { font-size: 15px; line-height: 1.7; }
 .qr-row { display: flex; gap: 16px; flex-wrap: wrap; margin: 12px 0; }
 .qr-item { text-align: center; }
@@ -134,3 +143,50 @@ select { outline: none; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .loading-text { font-size: 14px; color: #555; }
+
+/* Mobile narrow screens: single-column layout driven by the viewport
+   meta — not just enlarged fonts. Rows stack vertically, tabs split the
+   row evenly, QR codes go one per row, buttons go full width. */
+@media (max-width: 640px) {
+	body { font-size: 16px; }
+
+	.header { padding: 12px 16px; flex-wrap: wrap; gap: 8px; }
+	.header h1 { font-size: 19px; }
+	/* Subtitle drops below the logo on narrow screens */
+	.header-brand { flex-direction: column; align-items: flex-start; }
+	.header-subtitle { margin-left: 0; margin-top: 2px; }
+	.lang-switch button { padding: 6px 14px; font-size: 14px; }
+
+	/* Tabs: evenly split the row so all five stay visible */
+	.tabs { padding: 0 6px; }
+	.tab { flex: 1 1 0; text-align: center; font-size: 14px; padding: 12px 2px; white-space: nowrap; }
+
+	.tab-content { padding: 14px 10px; }
+	.section { padding: 14px; }
+
+	/* Form rows stack vertically: label on its own line, control full width */
+	.form-row { flex-direction: column; align-items: stretch; gap: 6px; }
+	.form-row > label { min-width: 0; }
+	.form-row > label:empty { display: none; }
+	.form-row input[type="password"], .form-row input[type="text"], .form-row input[type="number"] {
+		width: 100%; font-size: 16px; padding: 12px;   /* 16px prevents iOS auto-zoom */
+	}
+	.form-row input[type="number"] { flex: none; min-width: 0; }
+	.select-group { width: 100%; }
+	.select-group select { flex: 1; font-size: 16px; padding: 12px; }
+	.textarea-input { font-size: 15px; }
+
+	/* Buttons: full width for easy tapping */
+	.btn { width: 100%; font-size: 16px; padding: 13px 0; }
+	.btn-sm { width: auto; padding: 10px 20px; }
+
+	/* QR codes: one per row, centered, never overflow */
+	.qr-row { flex-direction: column; align-items: center; gap: 12px; }
+	.qr-item canvas { max-width: 100% !important; height: auto !important; }
+
+	.output-value { font-size: 14px; padding: 9px 10px; }
+	.output-value.hash { font-size: 12px; }
+	.mnemonic-words { font-size: 16px; line-height: 1.8; }
+	.crypto-status { font-size: 13px; }
+	.entropy-indicator { font-size: 13px; min-width: 0; }
+}

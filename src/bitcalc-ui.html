@@ -2,6 +2,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title data-i18n="title">BitCalc Bitcoin Address Calculator</title>
 	<style type="text/css">
 //main.css
@@ -15,7 +16,10 @@
 </div>
 
 <div class="header">
-	<h1><span>Bit</span>Calc <span data-i18n="title" style="font-weight:300;font-size:14px;color:#888;margin-left:8px;">Bitcoin Address Calculator</span></h1>
+	<div class="header-brand">
+		<h1><span>Bit</span>Calc <span class="bc-badge">BC</span></h1>
+		<div class="header-subtitle" data-i18n="title">比特币地址计算器</div>
+	</div>
 	<div class="lang-switch">
 		<button class="lang-btn active" data-lang="zh" data-i18n="langZh" onclick="setLang('zh')">中文</button>
 		<button class="lang-btn" data-lang="en" data-i18n="langEn" onclick="setLang('en')">English</button>
@@ -92,7 +96,7 @@
 			<h2 data-i18n="mnemonicOutput">助记词路径</h2>
 			<div class="output-row" data-field="mnemonic">
 				<div class="output-label" data-i18n="mnemonicLabel">助记词</div>
-				<div class="output-value mnemonic-words"></div>
+				<div class="output-value sensitive" onclick="toggleSensitive(this)" title="🔒 点击显示 / click to reveal" mnemonic-words"></div>
 			</div>
 			<div class="qr-row">
 				<div class="qr-item"><div id="brain-qr-segwit"></div><div class="qr-label" data-i18n="derivedSegwit">HD SegWit</div></div>
@@ -121,7 +125,7 @@
 				</div>
 				<div class="output-row" data-field="wifComp">
 					<div class="output-label" data-i18n="wifComp">私钥 WIF (压缩, K/L...)</div>
-					<div class="output-value"></div>
+					<div class="output-value sensitive" onclick="toggleSensitive(this)" title="🔒 点击显示 / click to reveal""></div>
 				</div>
 			</div>
 
@@ -141,7 +145,7 @@
 					</div>
 					<div class="output-row" data-field="wifUncomp">
 						<div class="output-label" data-i18n="wifUncomp">私钥 WIF (非压缩, 5...)</div>
-						<div class="output-value"></div>
+						<div class="output-value sensitive" onclick="toggleSensitive(this)" title="🔒 点击显示 / click to reveal""></div>
 					</div>
 				</div>
 			</div>
@@ -155,11 +159,11 @@
 			<div class="adv-content" style="display:none;margin-top:6px;">
 				<div class="output-row" data-field="entropyHex" style="margin-bottom:6px;">
 					<div class="output-label" data-i18n="entropyLabel">熵 (Hex)</div>
-					<div class="output-value hash" style="font-size:11px;"></div>
+					<div class="output-value sensitive" onclick="toggleSensitive(this)" title="🔒 点击显示 / click to reveal" hash" style="font-size:11px;"></div>
 				</div>
 				<div class="output-row" data-field="seedHex" style="margin-bottom:0;">
 					<div class="output-label" data-i18n="seedLabel">种子 (Hex)</div>
-					<div class="output-value hash" style="font-size:11px;"></div>
+					<div class="output-value sensitive" onclick="toggleSensitive(this)" title="🔒 点击显示 / click to reveal" hash" style="font-size:11px;"></div>
 				</div>
 			</div>
 		</div>
@@ -204,7 +208,7 @@
 			<h2 data-i18n="mnemonicOutput">助记词路径</h2>
 			<div class="output-row" data-field="mnemonic">
 				<div class="output-label" data-i18n="mnemonicLabel">助记词</div>
-				<div class="output-value mnemonic-words"></div>
+				<div class="output-value sensitive" onclick="toggleSensitive(this)" title="🔒 点击显示 / click to reveal" mnemonic-words"></div>
 			</div>
 			<div class="qr-row">
 				<div class="qr-item"><div id="random-qr-segwit"></div><div class="qr-label" data-i18n="derivedSegwit">HD SegWit</div></div>
@@ -233,7 +237,7 @@
 				</div>
 				<div class="output-row" data-field="wifComp">
 					<div class="output-label" data-i18n="wifComp">私钥 WIF (压缩, K/L...)</div>
-					<div class="output-value"></div>
+					<div class="output-value sensitive" onclick="toggleSensitive(this)" title="🔒 点击显示 / click to reveal""></div>
 				</div>
 			</div>
 
@@ -253,7 +257,7 @@
 					</div>
 					<div class="output-row" data-field="wifUncomp">
 						<div class="output-label" data-i18n="wifUncomp">私钥 WIF (非压缩, 5...)</div>
-						<div class="output-value"></div>
+						<div class="output-value sensitive" onclick="toggleSensitive(this)" title="🔒 点击显示 / click to reveal""></div>
 					</div>
 				</div>
 			</div>
@@ -267,11 +271,11 @@
 			<div class="adv-content" style="display:none;margin-top:6px;">
 				<div class="output-row" data-field="entropyHex" style="margin-bottom:6px;">
 					<div class="output-label" data-i18n="entropyLabel">熵 (Hex)</div>
-					<div class="output-value hash" style="font-size:11px;"></div>
+					<div class="output-value sensitive" onclick="toggleSensitive(this)" title="🔒 点击显示 / click to reveal" hash" style="font-size:11px;"></div>
 				</div>
 				<div class="output-row" data-field="seedHex" style="margin-bottom:0;">
 					<div class="output-label" data-i18n="seedLabel">种子 (Hex)</div>
-					<div class="output-value hash" style="font-size:11px;"></div>
+					<div class="output-value sensitive" onclick="toggleSensitive(this)" title="🔒 点击显示 / click to reveal" hash" style="font-size:11px;"></div>
 				</div>
 			</div>
 		</div>
@@ -352,11 +356,11 @@
 			<div class="adv-content" style="display:none;margin-top:6px;">
 				<div class="output-row" data-field="entropyHex" style="margin-bottom:6px;">
 					<div class="output-label" data-i18n="entropyLabel">熵 (Hex)</div>
-					<div class="output-value hash" style="font-size:11px;"></div>
+					<div class="output-value sensitive" onclick="toggleSensitive(this)" title="🔒 点击显示 / click to reveal" hash" style="font-size:11px;"></div>
 				</div>
 				<div class="output-row" data-field="seedHex" style="margin-bottom:0;">
 					<div class="output-label" data-i18n="seedLabel">种子 (Hex)</div>
-					<div class="output-value hash" style="font-size:11px;"></div>
+					<div class="output-value sensitive" onclick="toggleSensitive(this)" title="🔒 点击显示 / click to reveal" hash" style="font-size:11px;"></div>
 				</div>
 			</div>
 		</div>
@@ -394,11 +398,15 @@
 </div>
 
 <div style="max-width:960px;margin:0 auto;padding:0 24px 24px;text-align:center;">
-	<div style="font-size:12px;color:#999;margin-bottom:4px;">
-		<span data-i18n="donate">捐赠</span>:
-		<span style="font-family:monospace;color:#f7931a;">bc1qq5eqsmqmlkrjnd6y7hwhyuv73vrkrp2pg8ma2s</span>
+	<div style="font-size:12px;color:#666;margin-bottom:6px;">
+		<span data-i18n="usageTip">💡 使用建议：下载本页面后离线使用，以浏览器无痕模式打开</span>
 	</div>
 	<div style="font-size:10px;color:#000;margin-top:2px;" data-i18n="disclaimer">预览版。无担保，使用风险自负。No warranty, use at your own risk.</div>
+	<div style="font-size:10px;color:#888;margin-top:4px;" data-i18n="version">当前版本：2026.08.02</div>
+	<div style="border-top:1px solid #e0e0e0;margin-top:14px;padding-top:12px;font-size:12px;color:#999;">
+		<span data-i18n="donate">☕ 捐赠支持</span>:
+		<span style="font-family:monospace;color:#f7931a;">bc1qq5eqsmqmlkrjnd6y7hwhyuv73vrkrp2pg8ma2s</span>
+	</div>
 </div>
 
 <script type="text/javascript">

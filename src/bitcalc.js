@@ -1,6 +1,6 @@
 var L = {
 	zh: {
-		title: "BitCalc 比特币地址计算器",
+		title: "比特币地址计算器",
 		tabBrain: "脑钱包", tabRandom: "随机钱包", tabMnemonic: "助记词", tabVerify: "验证", tabTest: "自检",
 		langZh: "中文", langEn: "English",
 		brainTitle: "脑钱包 - 从密码生成地址",
@@ -58,11 +58,13 @@ var L = {
 		mneDetected: "检测到",
 		techDetails: "技术详情 (Hex)",
 		loading: "计算中...",
-		donate: "捐赠",
+		donate: "☕ 捐赠支持",
+		usageTip: "💡 使用建议：下载本页面后离线使用，以浏览器无痕模式打开",
 		disclaimer: "预览版。无担保，使用风险自负。No warranty, use at your own risk.",
+		version: "当前版本：2026.08.02",
 	},
 	en: {
-		title: "BitCalc Bitcoin Address Calculator",
+		title: "Bitcoin Address Calculator",
 		tabBrain: "Brain Wallet", tabRandom: "Random Wallet", tabMnemonic: "Mnemonic", tabVerify: "Verify", tabTest: "Self Test",
 		langZh: "中文", langEn: "English",
 		brainTitle: "Brain Wallet - Address from Password",
@@ -121,8 +123,10 @@ var L = {
 		mneDetected: "Detected",
 		techDetails: "Technical Details (Hex)",
 		loading: "Computing...",
-		donate: "Donation",
+		donate: "☕ Support this project",
+		usageTip: "💡 Tip: download this page and use it offline in a private/incognito window",
 		disclaimer: "Preview version. No warranty, use at your own risk.",
+		version: "Version: 2026.08.02",
 	}
 };
 var LANG = 'zh';
@@ -782,4 +786,11 @@ function toggleBrainShow(el) {
 
 function toggleDanger(cb, inputId) {
 	document.getElementById(inputId).disabled = !cb.checked;
+}
+
+// Toggle blur mask on sensitive output fields (mnemonics, private keys,
+// entropy/seed hex). Shoulder-surfing protection only — the raw value is
+// always in the DOM.
+function toggleSensitive(el) {
+	el.classList.toggle('show');
 }

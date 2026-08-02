@@ -2,6 +2,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title data-i18n="title">BitCalc Bitcoin Address Calculator</title>
 	<style type="text/css">
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -13,8 +14,15 @@ body {
 	background: #1a1a2e; color: #fff; padding: 16px 24px;
 	display: flex; align-items: center; justify-content: space-between;
 }
+.header-brand { display: flex; flex-direction: row; align-items: baseline; min-width: 0; }
 .header h1 { font-size: 20px; font-weight: 600; letter-spacing: 0.5px; }
+.header-subtitle { font-size: 12px; color: #888; font-weight: 300; margin-left: 8px; }
 .header h1 span { color: #f7931a; }
+.header h1 span.bc-badge {
+	background: #f7931a; color: #fff; font-size: 11px; font-weight: 700;
+	border-radius: 4px; padding: 2px 7px; vertical-align: middle;
+	letter-spacing: 0.5px;
+}
 .lang-switch { display: flex; gap: 4px; }
 .lang-switch button {
 	background: transparent; color: #888; border: 1px solid #444;
@@ -71,6 +79,8 @@ body {
 	border-radius: 4px; border: 1px solid #e0e0e0;
 }
 .output-value.hash { font-size: 11px; }
+.sensitive { filter: blur(6px); cursor: pointer; user-select: none; transition: filter 0.2s ease; }
+.sensitive.show { filter: none; user-select: auto; }
 .mnemonic-words { font-size: 15px; line-height: 1.7; }
 .qr-row { display: flex; gap: 16px; flex-wrap: wrap; margin: 12px 0; }
 .qr-item { text-align: center; }
@@ -141,6 +151,53 @@ select { outline: none; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .loading-text { font-size: 14px; color: #555; }
 
+/* Mobile narrow screens: single-column layout driven by the viewport
+   meta — not just enlarged fonts. Rows stack vertically, tabs split the
+   row evenly, QR codes go one per row, buttons go full width. */
+@media (max-width: 640px) {
+	body { font-size: 16px; }
+
+	.header { padding: 12px 16px; flex-wrap: wrap; gap: 8px; }
+	.header h1 { font-size: 19px; }
+	/* Subtitle drops below the logo on narrow screens */
+	.header-brand { flex-direction: column; align-items: flex-start; }
+	.header-subtitle { margin-left: 0; margin-top: 2px; }
+	.lang-switch button { padding: 6px 14px; font-size: 14px; }
+
+	/* Tabs: evenly split the row so all five stay visible */
+	.tabs { padding: 0 6px; }
+	.tab { flex: 1 1 0; text-align: center; font-size: 14px; padding: 12px 2px; white-space: nowrap; }
+
+	.tab-content { padding: 14px 10px; }
+	.section { padding: 14px; }
+
+	/* Form rows stack vertically: label on its own line, control full width */
+	.form-row { flex-direction: column; align-items: stretch; gap: 6px; }
+	.form-row > label { min-width: 0; }
+	.form-row > label:empty { display: none; }
+	.form-row input[type="password"], .form-row input[type="text"], .form-row input[type="number"] {
+		width: 100%; font-size: 16px; padding: 12px;   /* 16px prevents iOS auto-zoom */
+	}
+	.form-row input[type="number"] { flex: none; min-width: 0; }
+	.select-group { width: 100%; }
+	.select-group select { flex: 1; font-size: 16px; padding: 12px; }
+	.textarea-input { font-size: 15px; }
+
+	/* Buttons: full width for easy tapping */
+	.btn { width: 100%; font-size: 16px; padding: 13px 0; }
+	.btn-sm { width: auto; padding: 10px 20px; }
+
+	/* QR codes: one per row, centered, never overflow */
+	.qr-row { flex-direction: column; align-items: center; gap: 12px; }
+	.qr-item canvas { max-width: 100% !important; height: auto !important; }
+
+	.output-value { font-size: 14px; padding: 9px 10px; }
+	.output-value.hash { font-size: 12px; }
+	.mnemonic-words { font-size: 16px; line-height: 1.8; }
+	.crypto-status { font-size: 13px; }
+	.entropy-indicator { font-size: 13px; min-width: 0; }
+}
+
 	</style>
 </head>
 <body onclick="if(typeof SecureRandom!=='undefined')SecureRandom.seedTime();"
@@ -151,7 +208,10 @@ select { outline: none; }
 </div>
 
 <div class="header">
-	<h1><span>Bit</span>Calc <span data-i18n="title" style="font-weight:300;font-size:14px;color:#888;margin-left:8px;">Bitcoin Address Calculator</span></h1>
+	<div class="header-brand">
+		<h1><span>Bit</span>Calc <span class="bc-badge">BC</span></h1>
+		<div class="header-subtitle" data-i18n="title">比特币地址计算器</div>
+	</div>
 	<div class="lang-switch">
 		<button class="lang-btn active" data-lang="zh" data-i18n="langZh" onclick="setLang('zh')">中文</button>
 		<button class="lang-btn" data-lang="en" data-i18n="langEn" onclick="setLang('en')">English</button>
@@ -228,7 +288,7 @@ select { outline: none; }
 			<h2 data-i18n="mnemonicOutput">助记词路径</h2>
 			<div class="output-row" data-field="mnemonic">
 				<div class="output-label" data-i18n="mnemonicLabel">助记词</div>
-				<div class="output-value mnemonic-words"></div>
+				<div class="output-value sensitive" onclick="toggleSensitive(this)" title="🔒 点击显示 / click to reveal" mnemonic-words"></div>
 			</div>
 			<div class="qr-row">
 				<div class="qr-item"><div id="brain-qr-segwit"></div><div class="qr-label" data-i18n="derivedSegwit">HD SegWit</div></div>
@@ -257,7 +317,7 @@ select { outline: none; }
 				</div>
 				<div class="output-row" data-field="wifComp">
 					<div class="output-label" data-i18n="wifComp">私钥 WIF (压缩, K/L...)</div>
-					<div class="output-value"></div>
+					<div class="output-value sensitive" onclick="toggleSensitive(this)" title="🔒 点击显示 / click to reveal""></div>
 				</div>
 			</div>
 
@@ -277,7 +337,7 @@ select { outline: none; }
 					</div>
 					<div class="output-row" data-field="wifUncomp">
 						<div class="output-label" data-i18n="wifUncomp">私钥 WIF (非压缩, 5...)</div>
-						<div class="output-value"></div>
+						<div class="output-value sensitive" onclick="toggleSensitive(this)" title="🔒 点击显示 / click to reveal""></div>
 					</div>
 				</div>
 			</div>
@@ -291,11 +351,11 @@ select { outline: none; }
 			<div class="adv-content" style="display:none;margin-top:6px;">
 				<div class="output-row" data-field="entropyHex" style="margin-bottom:6px;">
 					<div class="output-label" data-i18n="entropyLabel">熵 (Hex)</div>
-					<div class="output-value hash" style="font-size:11px;"></div>
+					<div class="output-value sensitive" onclick="toggleSensitive(this)" title="🔒 点击显示 / click to reveal" hash" style="font-size:11px;"></div>
 				</div>
 				<div class="output-row" data-field="seedHex" style="margin-bottom:0;">
 					<div class="output-label" data-i18n="seedLabel">种子 (Hex)</div>
-					<div class="output-value hash" style="font-size:11px;"></div>
+					<div class="output-value sensitive" onclick="toggleSensitive(this)" title="🔒 点击显示 / click to reveal" hash" style="font-size:11px;"></div>
 				</div>
 			</div>
 		</div>
@@ -340,7 +400,7 @@ select { outline: none; }
 			<h2 data-i18n="mnemonicOutput">助记词路径</h2>
 			<div class="output-row" data-field="mnemonic">
 				<div class="output-label" data-i18n="mnemonicLabel">助记词</div>
-				<div class="output-value mnemonic-words"></div>
+				<div class="output-value sensitive" onclick="toggleSensitive(this)" title="🔒 点击显示 / click to reveal" mnemonic-words"></div>
 			</div>
 			<div class="qr-row">
 				<div class="qr-item"><div id="random-qr-segwit"></div><div class="qr-label" data-i18n="derivedSegwit">HD SegWit</div></div>
@@ -369,7 +429,7 @@ select { outline: none; }
 				</div>
 				<div class="output-row" data-field="wifComp">
 					<div class="output-label" data-i18n="wifComp">私钥 WIF (压缩, K/L...)</div>
-					<div class="output-value"></div>
+					<div class="output-value sensitive" onclick="toggleSensitive(this)" title="🔒 点击显示 / click to reveal""></div>
 				</div>
 			</div>
 
@@ -389,7 +449,7 @@ select { outline: none; }
 					</div>
 					<div class="output-row" data-field="wifUncomp">
 						<div class="output-label" data-i18n="wifUncomp">私钥 WIF (非压缩, 5...)</div>
-						<div class="output-value"></div>
+						<div class="output-value sensitive" onclick="toggleSensitive(this)" title="🔒 点击显示 / click to reveal""></div>
 					</div>
 				</div>
 			</div>
@@ -403,11 +463,11 @@ select { outline: none; }
 			<div class="adv-content" style="display:none;margin-top:6px;">
 				<div class="output-row" data-field="entropyHex" style="margin-bottom:6px;">
 					<div class="output-label" data-i18n="entropyLabel">熵 (Hex)</div>
-					<div class="output-value hash" style="font-size:11px;"></div>
+					<div class="output-value sensitive" onclick="toggleSensitive(this)" title="🔒 点击显示 / click to reveal" hash" style="font-size:11px;"></div>
 				</div>
 				<div class="output-row" data-field="seedHex" style="margin-bottom:0;">
 					<div class="output-label" data-i18n="seedLabel">种子 (Hex)</div>
-					<div class="output-value hash" style="font-size:11px;"></div>
+					<div class="output-value sensitive" onclick="toggleSensitive(this)" title="🔒 点击显示 / click to reveal" hash" style="font-size:11px;"></div>
 				</div>
 			</div>
 		</div>
@@ -488,11 +548,11 @@ select { outline: none; }
 			<div class="adv-content" style="display:none;margin-top:6px;">
 				<div class="output-row" data-field="entropyHex" style="margin-bottom:6px;">
 					<div class="output-label" data-i18n="entropyLabel">熵 (Hex)</div>
-					<div class="output-value hash" style="font-size:11px;"></div>
+					<div class="output-value sensitive" onclick="toggleSensitive(this)" title="🔒 点击显示 / click to reveal" hash" style="font-size:11px;"></div>
 				</div>
 				<div class="output-row" data-field="seedHex" style="margin-bottom:0;">
 					<div class="output-label" data-i18n="seedLabel">种子 (Hex)</div>
-					<div class="output-value hash" style="font-size:11px;"></div>
+					<div class="output-value sensitive" onclick="toggleSensitive(this)" title="🔒 点击显示 / click to reveal" hash" style="font-size:11px;"></div>
 				</div>
 			</div>
 		</div>
@@ -530,11 +590,15 @@ select { outline: none; }
 </div>
 
 <div style="max-width:960px;margin:0 auto;padding:0 24px 24px;text-align:center;">
-	<div style="font-size:12px;color:#999;margin-bottom:4px;">
-		<span data-i18n="donate">捐赠</span>:
-		<span style="font-family:monospace;color:#f7931a;">bc1qq5eqsmqmlkrjnd6y7hwhyuv73vrkrp2pg8ma2s</span>
+	<div style="font-size:12px;color:#666;margin-bottom:6px;">
+		<span data-i18n="usageTip">💡 使用建议：下载本页面后离线使用，以浏览器无痕模式打开</span>
 	</div>
 	<div style="font-size:10px;color:#000;margin-top:2px;" data-i18n="disclaimer">预览版。无担保，使用风险自负。No warranty, use at your own risk.</div>
+	<div style="font-size:10px;color:#888;margin-top:4px;" data-i18n="version">当前版本：2026.08.02</div>
+	<div style="border-top:1px solid #e0e0e0;margin-top:14px;padding-top:12px;font-size:12px;color:#999;">
+		<span data-i18n="donate">☕ 捐赠支持</span>:
+		<span style="font-family:monospace;color:#f7931a;">bc1qq5eqsmqmlkrjnd6y7hwhyuv73vrkrp2pg8ma2s</span>
+	</div>
 </div>
 
 <script type="text/javascript">
@@ -6841,7 +6905,7 @@ bip32.nodeToSegwitAddress = function (node, network) {
 <script type="text/javascript">
 var L = {
 	zh: {
-		title: "BitCalc 比特币地址计算器",
+		title: "比特币地址计算器",
 		tabBrain: "脑钱包", tabRandom: "随机钱包", tabMnemonic: "助记词", tabVerify: "验证", tabTest: "自检",
 		langZh: "中文", langEn: "English",
 		brainTitle: "脑钱包 - 从密码生成地址",
@@ -6899,11 +6963,13 @@ var L = {
 		mneDetected: "检测到",
 		techDetails: "技术详情 (Hex)",
 		loading: "计算中...",
-		donate: "捐赠",
+		donate: "☕ 捐赠支持",
+		usageTip: "💡 使用建议：下载本页面后离线使用，以浏览器无痕模式打开",
 		disclaimer: "预览版。无担保，使用风险自负。No warranty, use at your own risk.",
+		version: "当前版本：2026.08.02",
 	},
 	en: {
-		title: "BitCalc Bitcoin Address Calculator",
+		title: "Bitcoin Address Calculator",
 		tabBrain: "Brain Wallet", tabRandom: "Random Wallet", tabMnemonic: "Mnemonic", tabVerify: "Verify", tabTest: "Self Test",
 		langZh: "中文", langEn: "English",
 		brainTitle: "Brain Wallet - Address from Password",
@@ -6962,8 +7028,10 @@ var L = {
 		mneDetected: "Detected",
 		techDetails: "Technical Details (Hex)",
 		loading: "Computing...",
-		donate: "Donation",
+		donate: "☕ Support this project",
+		usageTip: "💡 Tip: download this page and use it offline in a private/incognito window",
 		disclaimer: "Preview version. No warranty, use at your own risk.",
+		version: "Version: 2026.08.02",
 	}
 };
 var LANG = 'zh';
@@ -7623,6 +7691,13 @@ function toggleBrainShow(el) {
 
 function toggleDanger(cb, inputId) {
 	document.getElementById(inputId).disabled = !cb.checked;
+}
+
+// Toggle blur mask on sensitive output fields (mnemonics, private keys,
+// entropy/seed hex). Shoulder-surfing protection only — the raw value is
+// always in the DOM.
+function toggleSensitive(el) {
+	el.classList.toggle('show');
 }
 
 </script>
