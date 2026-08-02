@@ -46,10 +46,19 @@ Without a mnemonic, you cannot participate in BIP-361's Phase C recovery mechani
 | **Auto-fill Recovery** | Generated mnemonic auto-filled to recovery tab |
 | **Loading Animation** | Spinner overlay during computation |
 | **QR Code** | QR codes for addresses and private keys |
+| **Sensitive Mask** | Mnemonics, WIF private keys and entropy/seed hex are blur-masked until clicked (shoulder-surfing protection) |
+| **Mobile Friendly** | Viewport-driven single-column layout with enlarged touch targets |
 | **Bilingual** | Chinese / English UI toggle |
 | **Fully Offline** | Single HTML file, open in any browser |
 
 ## Changelog
+
+### 2026-08-02 — UI Polish & Mobile Support
+
+- **BC badge**: Logo restored to "BitCalc" with an orange "BC" abbreviation badge; subtitle no longer repeats the brand name, and drops below the logo on narrow screens (inline on desktop)
+- **Sensitive output masks**: Mnemonics, WIF private keys, entropy and seed hex (12 fields) are blur-masked by default and revealed on click — shoulder-surfing protection (values stay in the DOM; this is not encryption)
+- **Mobile support**: Added the viewport meta (root cause of tiny rendering — pages were laid out at 980px and scaled down); narrow screens switch to a single-column layout: tabs split the row evenly, form rows stack vertically, QR codes one per row, buttons full width; 16px inputs also prevent iOS auto-zoom
+- **Footer**: Usage tip added (download and use offline in a private/incognito window); version line "当前版本 2026.08.02" (release-date versioning); donation moved into its own section under a divider with a coffee icon
 
 ### 2026-08-01 — Random Number Security Hardening
 
